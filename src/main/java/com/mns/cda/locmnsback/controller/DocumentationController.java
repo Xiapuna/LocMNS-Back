@@ -61,7 +61,7 @@ public class DocumentationController {
     }
 
     @PutMapping("/documentation/{id}")
-    public ResponseEntity<Documentation> update(@PathVariable int id, @RequestBody Documentation documentationToUpdate) {
+    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Documentation documentationToUpdate) {
 
         Optional<Documentation> optionalDocumentation = documentationDao.findById(id);
 

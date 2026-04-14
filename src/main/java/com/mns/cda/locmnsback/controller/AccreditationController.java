@@ -58,7 +58,7 @@ public class AccreditationController {
     }
 
     @PutMapping("/accreditation/{id}")
-    public ResponseEntity<Accreditation> update(@PathVariable int id, @RequestBody Accreditation accreditationToUpdate) {
+    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Accreditation accreditationToUpdate) {
 
         Optional<Accreditation> optionalAccreditation = accreditationDao.findById(id);
 

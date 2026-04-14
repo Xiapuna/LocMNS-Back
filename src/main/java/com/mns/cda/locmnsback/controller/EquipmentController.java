@@ -61,7 +61,7 @@ public class EquipmentController {
     }
 
     @PutMapping("/equipment/{id}")
-    public ResponseEntity<Equipment> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
+    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
 
         Optional<Equipment> optionalEquipment = equipmentDao.findById(id);
 

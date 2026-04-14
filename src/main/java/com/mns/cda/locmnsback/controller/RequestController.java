@@ -59,7 +59,7 @@ public class RequestController {
     }
 
     @PutMapping("/request/{id}")
-    public ResponseEntity<Request> update(@PathVariable int id, @RequestBody Request requestToUpdate) {
+    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Request requestToUpdate) {
 
         Optional<Request> optionalRequest = requestDao.findById(id);
 
