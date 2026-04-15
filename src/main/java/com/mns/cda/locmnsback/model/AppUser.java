@@ -1,6 +1,5 @@
 package com.mns.cda.locmnsback.model;
 
-import com.mns.cda.locmnsback.dao.UserDao;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -8,14 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class User {
+public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +22,7 @@ public class User {
     @Column(length = 100)
     @Length(min = 1, max = 100)
     @NotBlank
-    protected String firstname;
+    protected String firstName;
 
     @Column(length = 100)
     @Length(min = 1, max = 100)
