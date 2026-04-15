@@ -38,7 +38,7 @@ public class ModelController {
         return new ResponseEntity<>(optionalModel.get(), HttpStatus.OK);
     }
 
-    @PostMapping("/model/{id}")
+    @PostMapping("/model")
     public ResponseEntity<Model> create(@RequestBody Model modelToInsert) {
 
         modelToInsert.setId(null);
@@ -57,7 +57,7 @@ public class ModelController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        typeDao.deleteById(id);
+        modelDao.deleteById(id);
 
         return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -70,6 +70,8 @@ public class ModelController {
         if(optionalModel.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        modelToUpdate.setId(id);
 
         modelDao.save(modelToUpdate);
 

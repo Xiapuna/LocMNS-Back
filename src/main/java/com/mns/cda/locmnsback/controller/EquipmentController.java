@@ -69,6 +69,8 @@ public class EquipmentController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        equipmentToUpdate.setId(id);
+
         equipmentDao.save(equipmentToUpdate);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

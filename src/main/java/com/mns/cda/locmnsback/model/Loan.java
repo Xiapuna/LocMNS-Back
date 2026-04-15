@@ -27,7 +27,7 @@ public class Loan {
     @Column(length = 100)
     @Length(min = 1, max = 100)
     @NotBlank
-    protected String realStartDate;
+    protected String realEndDate;
 
     @Column(length = 100)
     @Length(min = 1, max = 100)

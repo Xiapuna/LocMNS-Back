@@ -66,6 +66,8 @@ public class AccreditationController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        accreditationToUpdate.setId(id);
+
         accreditationDao.save(accreditationToUpdate);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

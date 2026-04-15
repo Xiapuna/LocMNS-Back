@@ -69,6 +69,8 @@ public class DocumentationController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        documentationToUpdate.setId(id);
+
         documentationDao.save(documentationToUpdate);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

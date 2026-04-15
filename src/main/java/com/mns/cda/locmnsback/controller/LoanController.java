@@ -66,6 +66,8 @@ public class LoanController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        loanToUpdate.setId(id);
+
         loanDao.save(loanToUpdate);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

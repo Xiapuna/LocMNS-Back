@@ -67,6 +67,8 @@ public class RequestController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        requestToUpdate.setId(id);
+
         requestDao.save(requestToUpdate);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
