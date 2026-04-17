@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.StateDao;
 import com.mns.cda.locmnsback.model.State;
+import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,10 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class StateController {
 
-    @Autowired
-    protected StateDao stateDao;
+    protected final StateDao stateDao;
 
     @GetMapping("/state/list")
     public List<State> getAll() {

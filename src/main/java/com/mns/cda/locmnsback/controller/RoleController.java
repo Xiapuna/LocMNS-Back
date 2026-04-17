@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.RoleDao;
 import com.mns.cda.locmnsback.model.Role;
+import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -13,10 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class RoleController {
 
-    @Autowired
-    protected RoleDao roleDao;
+    protected final RoleDao roleDao;
 
     @GetMapping("/role/list")
     public List<Role> getAll() {

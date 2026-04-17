@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.TypeDao;
 import com.mns.cda.locmnsback.model.Type;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class TypeController {
 
-    @Autowired
-    protected TypeDao typeDao;
+    protected final TypeDao typeDao;
 
     @GetMapping("/type/list")
     public List<Type> getAll() {

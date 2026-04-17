@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.LocationDao;
 import com.mns.cda.locmnsback.model.Location;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class LocationController {
 
-    @Autowired
-    protected LocationDao locationDao; // Injection de la dépendance (dépendance avec le @Repository)
+    protected final LocationDao locationDao; // Injection de la dépendance (dépendance avec le @Repository)
 
     @GetMapping("/location/list")
     public List<Location> getAll() {

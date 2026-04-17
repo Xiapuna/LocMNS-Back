@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.model.Loan;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class LoanController {
 
-    @Autowired
-    protected LoanDao loanDao;
+    protected final LoanDao loanDao;
 
     @GetMapping("/loan/list")
     public List<Loan> getAll() {

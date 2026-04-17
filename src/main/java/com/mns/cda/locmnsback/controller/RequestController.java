@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.RequestDao;
 import com.mns.cda.locmnsback.model.Request;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class RequestController {
 
-    @Autowired
-    protected RequestDao requestDao;
+    protected final RequestDao requestDao;
 
     @GetMapping("/request/list")
     public List<Request> getAll() {

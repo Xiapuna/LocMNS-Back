@@ -4,6 +4,7 @@ import com.mns.cda.locmnsback.dao.ModelDao;
 import com.mns.cda.locmnsback.dao.TypeDao;
 import com.mns.cda.locmnsback.model.Model;
 import jdk.javadoc.doclet.Reporter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class ModelController {
 
-    @Autowired
-    protected ModelDao modelDao;
-    @Autowired
-    private TypeDao typeDao;
+    protected final ModelDao modelDao;
 
     @GetMapping("/model/list")
     public List<Model> getAll() {

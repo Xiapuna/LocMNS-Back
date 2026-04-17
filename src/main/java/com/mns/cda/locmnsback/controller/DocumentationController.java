@@ -3,6 +3,7 @@ package com.mns.cda.locmnsback.controller;
 import com.mns.cda.locmnsback.dao.DocumentationDao;
 import com.mns.cda.locmnsback.model.Documentation;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class DocumentationController {
 
-    @Autowired
-    protected DocumentationDao documentationDao;
+    protected final DocumentationDao documentationDao;
 
     @GetMapping("/documentation/list")
     public List<Documentation> getAll() {

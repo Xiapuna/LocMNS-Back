@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.AppUserDao;
 import com.mns.cda.locmnsback.model.AppUser;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class AppUserController {
 
-    @Autowired
-    protected AppUserDao appUserDao;
+    protected final AppUserDao appUserDao;
 
     @GetMapping("/appuser/list")
     public List<AppUser> getAll() {

@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.EquipmentDao;
 import com.mns.cda.locmnsback.model.Equipment;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.config.RepositoryNameSpaceHandler;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class EquipmentController {
 
-    @Autowired
-    protected EquipmentDao equipmentDao;
+    protected final EquipmentDao equipmentDao;
 
     @GetMapping("/equipment/list")
     public List<Equipment> getAll() {
