@@ -1,5 +1,7 @@
 package com.mns.cda.locmnsback.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.mns.cda.locmnsback.view.AppUserView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -31,4 +33,8 @@ public class Model {
     @Length (min = 1, max = 500)
     @NotBlank
     protected String description;
+
+    @ManyToOne (optional = false)
+    @JsonView(AppUserView.class)
+    protected Documentation documentation;
 }

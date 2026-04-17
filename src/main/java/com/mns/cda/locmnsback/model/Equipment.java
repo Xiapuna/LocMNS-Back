@@ -1,5 +1,7 @@
 package com.mns.cda.locmnsback.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.mns.cda.locmnsback.view.AppUserView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -28,4 +30,8 @@ public class Equipment {
     @Length(min = 1, max = 100)
     @NotBlank
     protected String condition;
+
+    @ManyToOne (optional = false)
+    @JsonView(AppUserView.class)
+    protected Location location;
 }
