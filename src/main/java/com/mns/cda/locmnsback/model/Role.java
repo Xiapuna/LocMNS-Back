@@ -23,7 +23,6 @@ public class Role {
 
     @Column(length = 100)
     @Length(min = 1, max = 100)
-    @JsonView(AppUserView.class)
     @NotBlank
     protected String name;
 }

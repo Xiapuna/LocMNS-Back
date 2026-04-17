@@ -42,10 +42,8 @@ public class AppUser {
     protected String password;
 
     @ManyToOne (optional = false)
-    @JsonView(AppUserView.class)
     protected Role role;
 
     @ManyToOne (optional = false)
-    @JsonView(AppUserView.class)
     protected Accreditation accreditation;
 }

@@ -37,10 +37,8 @@ public class Loan {
     protected String endDate;
 
     @ManyToOne (optional = false)
-    @JsonView(AppUserView.class)
     protected AppUser appUser;
 
     @ManyToOne (optional = false)
-    @JsonView(AppUserView.class)
     protected Equipment equipment;
 }

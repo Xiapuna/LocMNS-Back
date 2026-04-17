@@ -32,6 +32,5 @@ public class Equipment {
     protected String condition;
 
     @ManyToOne (optional = false)
-    @JsonView(AppUserView.class)
     protected Location location;
 }

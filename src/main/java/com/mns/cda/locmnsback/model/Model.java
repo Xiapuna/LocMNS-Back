@@ -35,6 +35,5 @@ public class Model {
     protected String description;
 
     @ManyToOne (optional = false)
-    @JsonView(AppUserView.class)
     protected Documentation documentation;
 }
