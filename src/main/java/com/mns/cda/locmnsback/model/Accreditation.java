@@ -8,7 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Length;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,4 +31,13 @@ public class Accreditation {
     @JsonView(AppUserView.class)
     @NotBlank
     protected String name;
+
+    @ManyToMany
+    @JoinTable (
+            name = "type_accreditation",
+            joinColumns = @JoinColumn(name = "accreditation_id"),
+            inverseJoinColumns = @JoinColumn(name = "type_id")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    protected List<Type> types = new ArrayList<>();
 }

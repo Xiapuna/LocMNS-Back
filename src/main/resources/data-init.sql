@@ -44,10 +44,13 @@ INSERT INTO documentation (name, link) VALUES
    ('Documentation Speechi 1600', 'https://liendeladoc1.com'),
    ('Documentation Huawei 500', 'https://liendeladoc2.com');
 
-INSERT INTO model (name, description, documentation_id) VALUES
-    ('Huawei 500', 'Une description du produit', 1),
-    ('Speechi 1600', 'Une autre description du produit', 2);
+INSERT INTO model (name, description, documentation_id, type_id) VALUES
+    ('Huawei 500', 'Une description du produit', 1, 2),
+    ('Speechi 1600', 'Une autre description du produit', 2, 3);
 
-
+INSERT INTO type_accreditation (accreditation_id, type_id) VALUES
+    (1, 1),
+    (1, 2),
+    (2, 2);
 
 

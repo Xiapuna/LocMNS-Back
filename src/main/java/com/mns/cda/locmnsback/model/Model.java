@@ -36,4 +36,7 @@ public class Model {
 
     @ManyToOne (optional = false)
     protected Documentation documentation;
+
+    @ManyToOne (optional = false)
+    protected Type type;
 }
