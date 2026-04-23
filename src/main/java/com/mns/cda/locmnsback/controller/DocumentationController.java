@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 public class DocumentationController {
 
     protected final DocumentationDao documentationDao;

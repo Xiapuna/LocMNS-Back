@@ -33,4 +33,7 @@ public class Equipment {
 
     @ManyToOne (optional = false)
     protected Location location;
+
+    @ManyToOne (optional = false)
+    protected Model model;
 }

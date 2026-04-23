@@ -3,7 +3,6 @@ package com.mns.cda.locmnsback.controller;
 import com.mns.cda.locmnsback.dao.TypeDao;
 import com.mns.cda.locmnsback.model.Type;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 public class TypeController {
 
     protected final TypeDao typeDao;

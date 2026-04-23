@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 public class RequestController {
 
     protected final RequestDao requestDao;

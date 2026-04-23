@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 public class LocationController {
 
     protected final LocationDao locationDao; // Injection de la dépendance (dépendance avec le @Repository)

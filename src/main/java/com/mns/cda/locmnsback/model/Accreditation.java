@@ -1,5 +1,6 @@
 package com.mns.cda.locmnsback.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mns.cda.locmnsback.view.AppUserView;
 import jakarta.persistence.*;
@@ -33,6 +34,7 @@ public class Accreditation {
     protected String name;
 
     @ManyToMany
+    @JsonIgnoreProperties("accreditations")
     @JoinTable (
             name = "type_accreditation",
             joinColumns = @JoinColumn(name = "accreditation_id"),
