@@ -1,14 +1,15 @@
 package com.mns.cda.locmnsback.model;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.mns.cda.locmnsback.view.AppUserView;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
+
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -21,24 +22,27 @@ public class Loan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Integer id;
 
-    @Column(length = 100)
-    @Length(min = 1, max = 100)
-    @NotBlank
-    protected String startDate;
+    @Column
+    @NotNull
+//    @DateTimeFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
+    protected LocalDate startDate;
 
-    @Column(length = 100)
-    @Length(min = 1, max = 100)
-    @NotBlank
-    protected String realEndDate;
+    @Column
+//    @DateTimeFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
+    protected LocalDate realEndDate;
 
-    @Column(length = 100)
-    @Length(min = 1, max = 100)
-    @NotBlank
-    protected String endDate;
+    @Column
+    @NotNull
+//    @DateTimeFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
+    protected LocalDate endDate;
 
-    @ManyToOne (optional = false)
+    @ManyToOne
     protected AppUser appUser;
 
-    @ManyToOne (optional = false)
+    @ManyToOne
+    @JsonIgnoreProperties("loans")
     protected Equipment equipment;
 }

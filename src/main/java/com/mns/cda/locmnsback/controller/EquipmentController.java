@@ -1,14 +1,15 @@
 package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.EquipmentDao;
+import com.mns.cda.locmnsback.dao.LoanDao;
+import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
+import com.mns.cda.locmnsback.model.Loan;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.config.RepositoryNameSpaceHandler;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class EquipmentController {
 
     protected final EquipmentDao equipmentDao;
+    protected final LoanDao loanDao;
 
     @GetMapping("/equipment/list")
     public List<Equipment> getAll() {
@@ -36,6 +38,14 @@ public class EquipmentController {
 
         return new ResponseEntity<>(optionalEquipment.get(), HttpStatus.OK);
 
+    }
+
+    @GetMapping("/equipment/{id}/loans")
+    public List<LoanCalendarDto> getLoansForEquipment (@PathVariable int id){
+            return loanDao.findByEquipmentId(id)
+                    .stream()
+                    .map(l -> new LoanCalendarDto(l.getStartDate(), l.getEndDate()))
+                    .toList();
     }
 
     @PostMapping("/equipment")

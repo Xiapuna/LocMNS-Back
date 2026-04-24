@@ -1,5 +1,6 @@
 package com.mns.cda.locmnsback.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mns.cda.locmnsback.view.AppUserView;
 import jakarta.persistence.*;
@@ -9,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,4 +40,8 @@ public class Equipment {
 
     @ManyToOne (optional = false)
     protected Model model;
+
+    @OneToMany (mappedBy = "equipment")
+    @JsonIgnoreProperties("equipment")
+    protected List<Loan> loans = new ArrayList<>();
 }

@@ -44,9 +44,11 @@ INSERT INTO app_user (first_name, name, email, password, role_id, accreditation_
     ('Franck', 'DOYEN', 'franck.doyen@gmail.com', 'root3', 1, 3);
 
 INSERT INTO loan (start_date, real_end_date, end_date, app_user_id, equipment_id) VALUES
-   ('16 Aout 2025', '30 Aout 2025', '30 Aout 2025', 3, 1),
-   ('02 Février 2026', '03 Fevrier 2026', '05 Fevrier 2026', 1, 2),
-   ('25 Mars 2026', '01 Avril 2026', '31 Mars 2026', 2, 3);
+   ('2026-02-27', '2026-02-28', '2026-03-02', 3, 1),
+   ('2026-10-11', '2026-10-28', '2026-11-05', 3, 1),
+   ('2026-02-27', '2026-02-28', '2026-03-02', 3, 1),
+   ('2026-05-09', '2026-05-21', '2026-05-21', 1, 2),
+   ('2026-06-12', '2026-06-13', '2026-06-13', 2, 3);
 
 INSERT INTO type_accreditation (accreditation_id, type_id) VALUES
     (1, 1),
