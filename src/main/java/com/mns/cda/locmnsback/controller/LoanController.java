@@ -1,13 +1,18 @@
 package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.LoanDao;
+import com.mns.cda.locmnsback.dto.LoanCreateDto;
+import com.mns.cda.locmnsback.model.AppUser;
+import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.model.Loan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,13 +41,56 @@ public class LoanController {
     }
 
     @PostMapping("/loan")
-    public ResponseEntity<Loan> create(@RequestBody Loan loanToInsert) {
+    public ResponseEntity<?> create(@RequestBody LoanCreateDto loanCreateDto) {
 
-        loanToInsert.setId(null);
+        System.out.println(">>> CONTROLLER APPELÉ <<<");
 
-        loanDao.save(loanToInsert);
+        LocalDate startDate = loanCreateDto.startDate();
+        LocalDate endDate = loanCreateDto.endDate();
+        Integer equipmentId = loanCreateDto.equipmentId();
+        Integer appUserId = loanCreateDto.appUserId();
 
-        return new ResponseEntity<>(loanToInsert, HttpStatus.CREATED);
+        if (startDate.isBefore(LocalDate.now())) {
+            return new ResponseEntity<>("La date de début ne peut pas être dans le passé.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (endDate.isBefore(startDate)) {
+            return new ResponseEntity<>("La date de fin doit être après la date de début.", HttpStatus.BAD_REQUEST);
+        }
+
+        List<Loan> existingLoans = loanDao.findByEquipmentId(equipmentId);
+
+        for (Loan existing : existingLoans) {
+            LocalDate existingStart = existing.getStartDate();
+            LocalDate existingEnd = existing.getEndDate();
+
+            boolean overlap =
+                !startDate.isAfter(existing.getEndDate()) &&
+                !endDate.isBefore(existing.getStartDate());
+
+            if (overlap) {
+                return new ResponseEntity(
+                    "L'équipement est déjà réservé du " + existingStart + " au " + existingEnd,
+                    HttpStatus.CONFLICT
+                );
+            }
+        }
+
+        Loan loan = new Loan();
+        loan.setStartDate(startDate);
+        loan.setEndDate(endDate);
+
+        Equipment equipment = new Equipment();
+        equipment.setId(equipmentId);
+        loan.setEquipment(equipment);
+
+        AppUser user = new AppUser();
+        user.setId(appUserId);
+        loan.setAppUser(user);
+
+        loanDao.save(loan);
+
+        return new ResponseEntity<>(loan, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/loan/{id}")
