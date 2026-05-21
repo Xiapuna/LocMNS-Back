@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface LoanDao extends JpaRepository<Loan, Integer> {
     List<Loan> findByEquipmentId(Integer equipmentId);
+    List<Loan> findByAppUserId(Integer userId);
 }

@@ -5,6 +5,8 @@ import com.mns.cda.locmnsback.dto.LoanCreateDto;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.model.Loan;
+import com.mns.cda.locmnsback.security.IsAdmin;
+import com.mns.cda.locmnsback.security.IsUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,11 +26,13 @@ public class LoanController {
     protected final LoanDao loanDao;
 
     @GetMapping("/loan/list")
+    @IsUser
     public List<Loan> getAll() {
         return loanDao.findAll();
     }
 
     @GetMapping("/loan/{id}")
+    @IsUser
     public ResponseEntity<Loan> get(@PathVariable int id) {
 
         Optional<Loan> optionalLoan = loanDao.findById(id);
@@ -41,6 +45,7 @@ public class LoanController {
     }
 
     @PostMapping("/loan")
+    @IsUser
     public ResponseEntity<?> create(@RequestBody LoanCreateDto loanCreateDto) {
 
         System.out.println(">>> CONTROLLER APPELÉ <<<");
@@ -94,6 +99,7 @@ public class LoanController {
     }
 
     @DeleteMapping("/loan/{id}")
+    @IsAdmin
     public ResponseEntity<Loan> delete(@PathVariable int id) {
 
         Optional<Loan> optionalLoan = loanDao.findById(id);
@@ -108,6 +114,7 @@ public class LoanController {
     }
 
     @PutMapping("/loan/{id}")
+    @IsAdmin
     public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Loan loanToUpdate) {
 
         Optional<Loan> optionalLoan = loanDao.findById(id);

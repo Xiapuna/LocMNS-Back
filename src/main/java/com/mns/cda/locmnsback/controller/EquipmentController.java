@@ -5,6 +5,8 @@ import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.model.Loan;
+import com.mns.cda.locmnsback.security.IsAdmin;
+import com.mns.cda.locmnsback.security.IsUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +25,13 @@ public class EquipmentController {
     protected final LoanDao loanDao;
 
     @GetMapping("/equipment/list")
+    @IsUser
     public List<Equipment> getAll() {
         return equipmentDao.findAll();
     }
 
     @GetMapping("/equipment/{id}")
+    @IsUser
     public ResponseEntity<Equipment> get(@PathVariable int id) {
 
         Optional<Equipment> optionalEquipment = equipmentDao.findById(id);
@@ -41,6 +45,7 @@ public class EquipmentController {
     }
 
     @GetMapping("/equipment/{id}/loans")
+    @IsUser
     public List<LoanCalendarDto> getLoansForEquipment (@PathVariable int id){
             return loanDao.findByEquipmentId(id)
                     .stream()
@@ -49,6 +54,7 @@ public class EquipmentController {
     }
 
     @PostMapping("/equipment")
+    @IsAdmin
     public ResponseEntity<Equipment> create(@RequestBody Equipment equipmentToInsert) {
 
         equipmentToInsert.setId(null);
@@ -59,6 +65,7 @@ public class EquipmentController {
     }
 
     @DeleteMapping("/equipment/{id}")
+    @IsAdmin
     public ResponseEntity<Equipment> delete(@PathVariable int id) {
 
         Optional<Equipment> optionalEquipment = equipmentDao.findById(id);
@@ -73,6 +80,7 @@ public class EquipmentController {
     }
 
     @PutMapping("/equipment/{id}")
+    @IsAdmin
     public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
 
         Optional<Equipment> optionalEquipment = equipmentDao.findById(id);

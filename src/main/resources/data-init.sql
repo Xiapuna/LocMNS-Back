@@ -1,7 +1,6 @@
 INSERT INTO role (name) VALUES
     ('ADMIN'),
-    ('USER'),
-    ('STUDENT');
+    ('USER');
 
 INSERT INTO accreditation (name) VALUES
      ('Niveau1'),
@@ -39,16 +38,16 @@ INSERT INTO equipment (name, condition, location_id, model_id) VALUES
     ('Ordinateur n°9012', 'Etat de l''ordinateur3', 3, 2);
 
 INSERT INTO app_user (first_name, name, email, password, role_id, accreditation_id) VALUES
-    ('Célia', 'GODFRIN', 'celia.godfrin@gmail.com', 'root1', 2, 5),
-    ('Nicolas', 'LAUNAY', 'nicolas.launay@gmail.com', 'root2', 3, 2),
-    ('Franck', 'DOYEN', 'franck.doyen@gmail.com', 'root3', 1, 3);
+    ('Célia', 'GODFRIN', 'celia.godfrin@gmail.com', '$2a$10$unnTseHmf2ID7q78sMYjX.bKWuNA8SneNyAMPnyXhujzuLqXg7rbG', 1, 5),
+    ('Nicolas', 'LAUNAY', 'nicolas.launay@gmail.com', '$2a$10$GYD4FezrD/Fy/kd4bZcnye/2O7iGxgRrKyPCrds3xdibxXMiquWhO', 2, 2),
+    ('Franck', 'DOYEN', 'franck.doyen@gmail.com', '$2a$10$AQ90byLmxSwK45LxCFPJ1.mJd6l8jjLQqQOaXyHgs/RTWYOi.6U32', 2, 3);
 
 INSERT INTO loan (start_date, real_end_date, end_date, app_user_id, equipment_id) VALUES
-   ('2026-02-27', '2026-02-28', '2026-03-02', 3, 1),
-   ('2026-10-11', '2026-10-28', '2026-11-05', 3, 1),
-   ('2026-02-27', '2026-02-28', '2026-03-02', 3, 1),
-   ('2026-05-09', '2026-05-21', '2026-05-21', 1, 2),
-   ('2026-06-12', '2026-06-13', '2026-06-13', 2, 3);
+    ('2026-05-13', '2026-06-27', '2026-06-27', 3, 1),
+    ('2026-10-11', '2026-10-28', '2026-11-05', 3, 2),
+    ('2026-02-27', '2026-02-28', '2026-03-02', 3, 3),
+    ('2026-05-09', '2026-05-21', '2026-05-21', 1, 2),
+    ('2026-06-12', '2026-06-13', '2026-06-13', 2, 3);
 
 INSERT INTO type_accreditation (accreditation_id, type_id) VALUES
     (1, 1),
