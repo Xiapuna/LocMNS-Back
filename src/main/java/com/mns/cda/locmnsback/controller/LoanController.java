@@ -7,6 +7,7 @@ import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.model.Loan;
 import com.mns.cda.locmnsback.security.IsAdmin;
 import com.mns.cda.locmnsback.security.IsUser;
+import com.mns.cda.locmnsback.services.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class LoanController {
 
     protected final LoanDao loanDao;
+    protected final LoanService loanService;
 
     @GetMapping("/loan/list")
     @IsUser
@@ -128,6 +130,17 @@ public class LoanController {
         loanDao.save(loanToUpdate);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/loans/{id}/start")
+    public Loan startLoan(@PathVariable int id) {
+        return loanService.startLoan(id);
+    }
+
+    @PutMapping("/loans/{id}/request-extension")
+    @IsUser
+    public Loan requestExtension(@PathVariable int id) {
+        return loanService.requestExtension(id);
     }
 
 
