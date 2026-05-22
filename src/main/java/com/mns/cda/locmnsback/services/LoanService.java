@@ -45,4 +45,18 @@ public class LoanService {
 
         return loanDao.save(loan);
     }
+
+    public Loan requestReturn(Integer id) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prêt introuvable avec l'id : " + id));
+
+        if (loan.getLoanStatus() != LoanStatus.ONGOING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Impossible de demander un retour : le prêt n'est pas en cours.");
+        }
+
+        loan.setLoanStatus(LoanStatus.REQUESTED_RETURN);
+
+        return loanDao.save(loan);
+    }
+
 }

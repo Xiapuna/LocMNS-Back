@@ -133,6 +133,7 @@ public class LoanController {
     }
 
     @PutMapping("/loans/{id}/start")
+    @IsUser
     public Loan startLoan(@PathVariable int id) {
         return loanService.startLoan(id);
     }
@@ -143,5 +144,10 @@ public class LoanController {
         return loanService.requestExtension(id);
     }
 
+    @PutMapping("/loans/{id}/request-return")
+    @IsUser
+    public Loan requestReturn(@PathVariable int id) {
+        return loanService.requestReturn(id);
+    }
 
 }
