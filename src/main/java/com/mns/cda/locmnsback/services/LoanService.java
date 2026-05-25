@@ -94,4 +94,17 @@ public class LoanService {
         return loanDao.save(loan);
     }
 
+    public Loan validateReturn(Integer id) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prêt introuvable avec l'id : " + id));
+
+        if (loan.getLoanStatus() != LoanStatus.REQUESTED_RETURN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le retour ne peut être validé que si le prêt est en statut REQUESTED_RETURN.");
+        }
+
+        loan.setRealEndDate(LocalDate.now());
+        loan.setLoanStatus(LoanStatus.RETURNED);
+
+        return loanDao.save(loan);
+    }
 }

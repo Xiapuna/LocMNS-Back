@@ -10,11 +10,9 @@ import com.mns.cda.locmnsback.security.IsAdmin;
 import com.mns.cda.locmnsback.security.IsUser;
 import com.mns.cda.locmnsback.services.LoanService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -157,5 +155,10 @@ public class LoanController {
         return loanService.extendLoan(id, dto.newEndDate());
     }
 
+    @PutMapping("/loans/{id}/return")
+    @IsAdmin
+    public Loan validateReturn(@PathVariable int id) {
+        return loanService.validateReturn(id);
+    }
 
 }
