@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,40 @@ public class LoanService {
         }
 
         loan.setLoanStatus(LoanStatus.REQUESTED_RETURN);
+
+        return loanDao.save(loan);
+    }
+
+    public Loan extendLoan(Integer id, LocalDate newEndDate) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prêt introuvable avec l'id : " + id));
+
+        if (loan.getLoanStatus() != LoanStatus.REQUESTED_EXTENSION) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La prolongation ne peut être validée que si le prêt est en statut REQUESTED_EXTENSION.");
+        }
+
+        if (newEndDate.isBefore(loan.getEndDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nouvelle date de fin doit être postérieure à la date actuelle.");
+        }
+
+        List<Loan> existingLoans = loanDao.findByEquipmentId(loan.getEquipment().getId());
+
+        for (Loan existing : existingLoans) {
+            if (!existing.getId().equals(loan.getId())) {
+                boolean overlap =
+                        !newEndDate.isBefore(existing.getStartDate()) &&
+                                !loan.getStartDate().isAfter(existing.getEndDate());
+
+                if (overlap) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "Impossible de prolonger : chevauchement avec un autre prêt du " +
+                                    existing.getStartDate() + " au " + existing.getEndDate());
+                }
+            }
+        }
+
+        loan.setEndDate(newEndDate);
+        loan.setLoanStatus(LoanStatus.EXTENDED);
 
         return loanDao.save(loan);
     }

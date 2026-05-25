@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.LoanCreateDto;
+import com.mns.cda.locmnsback.dto.LoanExtensionDto;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.model.Loan;
@@ -149,5 +150,12 @@ public class LoanController {
     public Loan requestReturn(@PathVariable int id) {
         return loanService.requestReturn(id);
     }
+
+    @PutMapping("/loans/{id}/extend")
+    @IsAdmin
+    public Loan extendLoan(@PathVariable int id, @RequestBody LoanExtensionDto dto) {
+        return loanService.extendLoan(id, dto.newEndDate());
+    }
+
 
 }
