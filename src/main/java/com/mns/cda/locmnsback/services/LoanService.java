@@ -38,7 +38,8 @@ public class LoanService {
         Loan loan = loanDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prêt introuvable avec l'id : " + id));
 
-        if (loan.getLoanStatus() != LoanStatus.ONGOING) {
+        if (loan.getLoanStatus() != LoanStatus.ONGOING &&
+                loan.getLoanStatus() != LoanStatus.VALIDATED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Impossible de demander une prolongation : le prêt n'est pas en cours.");
         }
 
@@ -51,7 +52,8 @@ public class LoanService {
         Loan loan = loanDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prêt introuvable avec l'id : " + id));
 
-        if (loan.getLoanStatus() != LoanStatus.ONGOING) {
+        if (loan.getLoanStatus() != LoanStatus.ONGOING &&
+                loan.getLoanStatus() != LoanStatus.VALIDATED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Impossible de demander un retour : le prêt n'est pas en cours.");
         }
 

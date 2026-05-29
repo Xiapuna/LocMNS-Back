@@ -3,6 +3,7 @@ package com.mns.cda.locmnsback.controller;
 import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.LoanCreateDto;
 import com.mns.cda.locmnsback.dto.LoanExtensionDto;
+import com.mns.cda.locmnsback.enums.LoanStatus;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.model.Loan;
@@ -43,6 +44,15 @@ public class LoanController {
         }
 
         return new ResponseEntity<>(optionalLoan.get(), HttpStatus.OK);
+    }
+
+    @GetMapping("/loans")
+    @IsAdmin
+    public List<Loan> getByStatus(@RequestParam(required = false) LoanStatus status) {
+        if (status == null) {
+            return loanDao.findAll();
+        }
+        return loanDao.findByLoanStatus(status);
     }
 
     @PostMapping("/loan")
@@ -93,10 +103,23 @@ public class LoanController {
         AppUser user = new AppUser();
         user.setId(appUserId);
         loan.setAppUser(user);
+        loan.setLoanStatus(LoanStatus.VALIDATED);
 
         loanDao.save(loan);
 
         return new ResponseEntity<>(loan, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/loan/{id}/request-return")
+    public ResponseEntity<?> requestReturn(@PathVariable int id) {
+        loanService.requestReturn(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/loan/{id}/request-extension")
+    public ResponseEntity<?> requestExtension(@PathVariable int id) {
+        loanService.requestExtension(id);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/loan/{id}")
@@ -135,18 +158,6 @@ public class LoanController {
     @IsUser
     public Loan startLoan(@PathVariable int id) {
         return loanService.startLoan(id);
-    }
-
-    @PutMapping("/loans/{id}/request-extension")
-    @IsUser
-    public Loan requestExtension(@PathVariable int id) {
-        return loanService.requestExtension(id);
-    }
-
-    @PutMapping("/loans/{id}/request-return")
-    @IsUser
-    public Loan requestReturn(@PathVariable int id) {
-        return loanService.requestReturn(id);
     }
 
     @PutMapping("/loans/{id}/extend")
