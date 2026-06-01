@@ -15,7 +15,7 @@ services:
       - backend
 
   app:
-    image: image-back
+    image: xiapuna/locmns-back
     depends_on:
       - postgres
     ports:
@@ -24,7 +24,7 @@ services:
       - backend
 
   front:
-    image: image-front
+    image: xiapuna/locmns-front
     ports:
       - "80:80"
 

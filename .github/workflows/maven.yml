@@ -31,6 +31,13 @@ jobs:
     - name : rename .example.env to .env
       run: mv .example.env .env
 
+    - name: change localhost to db service name (postgres)
+      run: sed -i 's/ ${DB_HOST} /postgres/' src/main/resources/application.properties
+
+#    - name: Idem mais en modifiant le .env
+#      run: |
+#        sed -i 's/^DB_HOST=.*/DB_HOST=postgres' .env
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
