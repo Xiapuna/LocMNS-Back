@@ -15,7 +15,7 @@ services:
       - backend
 
   app:
-    image: xiapuna/locmns-back
+    image: xiapuna/locmns-back:0.0.2
     depends_on:
       - postgres
     ports:
