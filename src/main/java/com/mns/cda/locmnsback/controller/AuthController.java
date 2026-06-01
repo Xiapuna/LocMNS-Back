@@ -3,17 +3,15 @@ package com.mns.cda.locmnsback.controller;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.security.AppUserDetails;
 import com.mns.cda.locmnsback.services.AppUserService;
-import com.mns.cda.locmnsback.view.AppUserView;
-import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +23,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 @CrossOrigin
 public class AuthController {
+
+    @Value("${jwt.secret}")
+    protected String jwtSecret;
 
     private final AppUserService userService;
     private final AuthenticationProvider authenticationProvider;
@@ -57,7 +58,7 @@ public class AuthController {
                     .setSubject(user.getEmail())
                     .addClaims(Map.of("role", appUser.getUser().getRole().getName(),
                             "id", appUser.getUser().getId())) // Pour un ManyToMany .addClaims(Map.of("roles", user.getRoles().stream().map(RoleEnum r -> r.getName()).collect(Collectors.joining(",")))
-                    .signWith(SignatureAlgorithm.HS256, "azerty")
+                    .signWith(SignatureAlgorithm.HS256, jwtSecret)
                     .compact();
 
             return new ResponseEntity<>(jwt, HttpStatus.OK);
