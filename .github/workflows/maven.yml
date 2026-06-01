@@ -32,7 +32,7 @@ jobs:
       run: mv .example.env .env
 
     - name: change localhost to db service name (postgres)
-      run: sed -i 's/ ${DB_HOST} /postgres/' src/main/resources/application.properties
+      run: sed -i 's/${DB_HOST}/postgres/' src/main/resources/application.properties
 
 #    - name: Idem mais en modifiant le .env
 #      run: |
