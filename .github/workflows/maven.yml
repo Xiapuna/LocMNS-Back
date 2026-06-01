@@ -34,6 +34,12 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
+    - name: Extract project version
+      run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+    - name: Tag image with version from pom.xml
+      run: docker tag xiapuna/locmns-back xiapuna/locmns-back:${{ env.VERSION }}
+
     - name: Build docker image
       run: docker build -t xiapuna/locmns-back .
 
@@ -46,5 +52,7 @@ jobs:
     - name: Push docker image
       run: docker push xiapuna/locmns-back
 
+    - name: Push docker image with version
+      run: docker push xiapuna/locmns-back:${{ env.VERSION }}
 
   
