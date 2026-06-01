@@ -44,7 +44,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Push docker image
-      run: docker push -t xiapuna/locmns-back .
+      run: docker push xiapuna/locmns-back
 
 
   
