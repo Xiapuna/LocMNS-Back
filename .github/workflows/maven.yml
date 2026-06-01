@@ -37,11 +37,11 @@ jobs:
     - name: Extract project version
       run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
-    - name: Tag image with version from pom.xml
-      run: docker tag xiapuna/locmns-back xiapuna/locmns-back:${{ env.VERSION }}
-
     - name: Build docker image
       run: docker build -t xiapuna/locmns-back .
+
+    - name: Tag image with version from pom.xml
+      run: docker tag xiapuna/locmns-back xiapuna/locmns-back:${{ env.VERSION }}
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v4
