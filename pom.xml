@@ -10,8 +10,8 @@
     </parent>
     <groupId>com.mns.cda</groupId>
     <artifactId>LocMNS-Back</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>LocMNS-Back</name>
+    <version>0.0.2</version>
+    <name>locmns-back</name>
     <description>LocMNS-Back</description>
     <url/>
     <licenses>
