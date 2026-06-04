@@ -57,7 +57,9 @@ public class AuthController {
             String jwt = Jwts.builder()
                     .setSubject(user.getEmail())
                     .addClaims(Map.of("role", appUser.getUser().getRole().getName(),
-                            "id", appUser.getUser().getId())) // Pour un ManyToMany .addClaims(Map.of("roles", user.getRoles().stream().map(RoleEnum r -> r.getName()).collect(Collectors.joining(",")))
+                            "id", appUser.getUser().getId(),
+                            "firstname", appUser.getUser().getFirstName(),
+                            "name", appUser.getUser().getName())) // Pour un ManyToMany .addClaims(Map.of("roles", user.getRoles().stream().map(RoleEnum r -> r.getName()).collect(Collectors.joining(",")))
                     .signWith(SignatureAlgorithm.HS256, jwtSecret)
                     .compact();
 

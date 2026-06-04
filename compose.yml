@@ -23,10 +23,10 @@ services:
     networks:
       - backend
 
-#  front:
-#    image: xiapuna/locmns-front
-#    ports:
-#      - "80:80"
+  front:
+    image: xiapuna/locmns-front
+    ports:
+      - "80:80"
 
 volumes:
   postgres_data:
