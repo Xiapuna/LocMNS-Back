@@ -91,7 +91,15 @@ public class LoanService {
         }
 
         loan.setEndDate(newEndDate);
-        loan.setLoanStatus(LoanStatus.EXTENDED);
+        LocalDate today = LocalDate.now();
+
+        if (today.isBefore(loan.getStartDate())) {
+            loan.setLoanStatus(LoanStatus.VALIDATED);
+        } else if (today.isAfter(newEndDate)) {
+            loan.setLoanStatus(LoanStatus.RETURNED);
+        } else {
+            loan.setLoanStatus(LoanStatus.ONGOING);
+        }
 
         return loanDao.save(loan);
     }

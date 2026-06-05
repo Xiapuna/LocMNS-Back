@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -171,5 +172,13 @@ public class LoanController {
     public Loan validateReturn(@PathVariable int id) {
         return loanService.validateReturn(id);
     }
+
+    @GetMapping("/loans/{id}")
+    @IsUser
+    public Loan getLoanAdmin(@PathVariable int id) {
+        return loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
 
 }
