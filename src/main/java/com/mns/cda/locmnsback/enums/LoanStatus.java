@@ -5,6 +5,5 @@ public enum LoanStatus {
     ONGOING,
     REQUESTED_EXTENSION,
     REQUESTED_RETURN,
-    EXTENDED,
     RETURNED
 }
