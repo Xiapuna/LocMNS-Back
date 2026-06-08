@@ -104,20 +104,22 @@ public class LoanController {
         AppUser user = new AppUser();
         user.setId(appUserId);
         loan.setAppUser(user);
-        loan.setLoanStatus(LoanStatus.VALIDATED);
+//        loan.setLoanStatus(LoanStatus.VALIDATED);
 
-        loanDao.save(loan);
+        Loan saved = loanService.createLoan(loan);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
 
-        return new ResponseEntity<>(loan, HttpStatus.CREATED);
     }
 
     @PostMapping("/loan/{id}/request-return")
+    @IsUser
     public ResponseEntity<?> requestReturn(@PathVariable int id) {
         loanService.requestReturn(id);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/loan/{id}/request-extension")
+    @IsUser
     public ResponseEntity<?> requestExtension(@PathVariable int id) {
         loanService.requestExtension(id);
         return ResponseEntity.ok().build();

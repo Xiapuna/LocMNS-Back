@@ -11,6 +11,8 @@ import lombok.Setter;
 
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,19 +27,13 @@ public class Loan {
 
     @Column
     @NotNull
-//    @DateTimeFormat(pattern = "dd-MM-yyyy")
-//    @JsonFormat(pattern = "dd-MM-yyyy")
     protected LocalDate startDate;
 
     @Column
-//    @DateTimeFormat(pattern = "dd-MM-yyyy")
-//    @JsonFormat(pattern = "dd-MM-yyyy")
     protected LocalDate realEndDate;
 
     @Column
     @NotNull
-//    @DateTimeFormat(pattern = "dd-MM-yyyy")
-//    @JsonFormat(pattern = "dd-MM-yyyy")
     protected LocalDate endDate;
 
     @Column
@@ -50,4 +46,8 @@ public class Loan {
     @ManyToOne
     @JsonIgnoreProperties("loans")
     protected Equipment equipment;
+
+    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL)
+    private List<LoanHistory> history = new ArrayList<>();
+
 }
