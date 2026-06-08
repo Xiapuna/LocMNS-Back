@@ -3,6 +3,7 @@ package com.mns.cda.locmnsback.controller;
 import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.LoanCreateDto;
 import com.mns.cda.locmnsback.dto.LoanExtensionDto;
+import com.mns.cda.locmnsback.dto.LoanHistoryDto;
 import com.mns.cda.locmnsback.enums.LoanStatus;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.model.Equipment;
@@ -54,6 +55,22 @@ public class LoanController {
             return loanDao.findAll();
         }
         return loanDao.findByLoanStatus(status);
+    }
+
+    @GetMapping("/loans/{id}/history")
+    @IsAdmin
+    public List<LoanHistoryDto> getLoanHistory(@PathVariable int id) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return loan.getHistory()
+                .stream()
+                .map(h -> new LoanHistoryDto(
+                        loan.getId(),
+                        h.getDateChangement().toLocalDate(),
+                        h.getLoanState().getName()
+                ))
+                .toList();
     }
 
     @PostMapping("/loan")

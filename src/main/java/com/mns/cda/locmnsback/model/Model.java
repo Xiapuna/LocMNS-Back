@@ -1,5 +1,6 @@
 package com.mns.cda.locmnsback.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mns.cda.locmnsback.view.AppUserView;
 import jakarta.persistence.*;
