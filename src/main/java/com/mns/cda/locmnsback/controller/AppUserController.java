@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.AppUserDao;
 import com.mns.cda.locmnsback.dao.LoanDao;
+import com.mns.cda.locmnsback.dto.UserReservationDto;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.model.Loan;
 import com.mns.cda.locmnsback.security.IsAdmin;
@@ -47,8 +48,19 @@ public class AppUserController {
 
     @GetMapping("/appuser/{id}/loans")
     @IsUser
-    public List<Loan> getUserLoans (@PathVariable int id){
-        return loanDao.findByAppUserId(id);
+    public List<UserReservationDto> getUserLoans (@PathVariable int id){
+        return loanDao.findByAppUserId(id)
+                .stream()
+                .map(l -> new UserReservationDto(
+                        l.getId(),
+                        l.getEquipment().getId(),
+                        l.getEquipment().getModel().getType().getId(),
+                        l.getEquipment().getName(),
+                        l.getStartDate(),
+                        l.getEndDate(),
+                        l.getLoanStatus().name()
+                ))
+                .toList();
     }
 
     @PostMapping("/appuser")
