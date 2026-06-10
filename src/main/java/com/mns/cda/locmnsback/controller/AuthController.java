@@ -29,16 +29,13 @@ public class AuthController {
 
     private final AppUserService userService;
     private final AuthenticationProvider authenticationProvider;
-//    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/sign-in")
-//    @JsonView(AppUserView.class)
     public ResponseEntity<AppUser> signIn(
             @RequestBody
 //            @Validated(AppUser.OnCreate.class)
             AppUser userToInsert) {
 
-//        userToInsert.setPassword(passwordEncoder.encode(userToInsert.getPassword()));
         userService.insert(userToInsert);
 
         return new ResponseEntity<>(userToInsert, HttpStatus.CREATED);

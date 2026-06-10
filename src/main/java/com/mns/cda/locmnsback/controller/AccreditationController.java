@@ -3,7 +3,6 @@ package com.mns.cda.locmnsback.controller;
 import com.mns.cda.locmnsback.dao.AccreditationDao;
 import com.mns.cda.locmnsback.model.Accreditation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

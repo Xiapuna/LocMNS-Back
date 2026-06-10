@@ -4,7 +4,6 @@ import com.mns.cda.locmnsback.dao.AppUserDao;
 import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.UserReservationDto;
 import com.mns.cda.locmnsback.model.AppUser;
-import com.mns.cda.locmnsback.model.Loan;
 import com.mns.cda.locmnsback.security.IsAdmin;
 import com.mns.cda.locmnsback.security.IsUser;
 import com.mns.cda.locmnsback.services.AppUserService;

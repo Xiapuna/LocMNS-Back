@@ -4,14 +4,12 @@ import com.mns.cda.locmnsback.dao.EquipmentDao;
 import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
-import com.mns.cda.locmnsback.model.Loan;
 import com.mns.cda.locmnsback.security.IsAdmin;
 import com.mns.cda.locmnsback.security.IsUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Optional;

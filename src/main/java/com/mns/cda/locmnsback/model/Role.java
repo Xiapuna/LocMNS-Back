@@ -1,7 +1,5 @@
 package com.mns.cda.locmnsback.model;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.mns.cda.locmnsback.view.AppUserView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
