@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,12 @@ public class GlobalExceptionInterceptor {
     public Map<String, String> getConstraintViolationDatabase(DataIntegrityViolationException ex) {
 
         return Map.of("Erreur", "Erreur de contrainte dans la base de données");
+
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public Map<String, String> handleResponseStatusException(ResponseStatusException ex) {
+        return Map.of("error", ex.getReason());
 
     }
 
