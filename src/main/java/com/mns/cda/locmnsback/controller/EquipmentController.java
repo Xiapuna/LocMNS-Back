@@ -1,96 +1,67 @@
 package com.mns.cda.locmnsback.controller;
 
-import com.mns.cda.locmnsback.dao.EquipmentDao;
-import com.mns.cda.locmnsback.dao.LoanDao;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.security.IsAdmin;
 import com.mns.cda.locmnsback.security.IsUser;
+import com.mns.cda.locmnsback.services.EquipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin
 public class EquipmentController {
 
-    protected final EquipmentDao equipmentDao;
-    protected final LoanDao loanDao;
+    private final EquipmentService equipmentService;
 
     @GetMapping("/equipment/list")
     @IsUser
-    public List<Equipment> getAll() {
-        return equipmentDao.findAll();
+    public ResponseEntity<List<Equipment>> getAll() {
+
+        return ResponseEntity.ok(equipmentService.getAll());
     }
 
     @GetMapping("/equipment/{id}")
     @IsUser
     public ResponseEntity<Equipment> get(@PathVariable int id) {
 
-        Optional<Equipment> optionalEquipment = equipmentDao.findById(id);
-
-        if (optionalEquipment.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(optionalEquipment.get(), HttpStatus.OK);
-
+        return ResponseEntity.ok(equipmentService.get(id));
     }
 
     @GetMapping("/equipment/{id}/loans")
     @IsUser
-    public List<LoanCalendarDto> getLoansForEquipment (@PathVariable int id){
-            return loanDao.findByEquipmentId(id)
-                    .stream()
-                    .map(l -> new LoanCalendarDto(l.getStartDate(), l.getEndDate()))
-                    .toList();
+    public ResponseEntity<List<LoanCalendarDto>> getLoansForEquipment (@PathVariable int id){
+            return ResponseEntity.ok(equipmentService.getLoansForEquipment(id));
     }
 
     @PostMapping("/equipment")
     @IsAdmin
     public ResponseEntity<Equipment> create(@RequestBody Equipment equipmentToInsert) {
 
-        equipmentToInsert.setId(null);
-
-        equipmentDao.save(equipmentToInsert);
-
-        return new ResponseEntity<>(equipmentToInsert, HttpStatus.CREATED);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(equipmentService.create(equipmentToInsert));
     }
 
     @DeleteMapping("/equipment/{id}")
     @IsAdmin
-    public ResponseEntity<Equipment> delete(@PathVariable int id) {
+    public ResponseEntity<Void> delete(@PathVariable int id) {
+        equipmentService.delete(id);
 
-        Optional<Equipment> optionalEquipment = equipmentDao.findById(id);
-
-        if(optionalEquipment.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        equipmentDao.deleteById(id);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/equipment/{id}")
     @IsAdmin
     public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
 
-        Optional<Equipment> optionalEquipment = equipmentDao.findById(id);
+        equipmentService.update(id, equipmentToUpdate);
 
-        if(optionalEquipment.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        equipmentToUpdate.setId(id);
-
-        equipmentDao.save(equipmentToUpdate);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

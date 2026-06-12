@@ -52,7 +52,6 @@ public class LoanService {
         return loanDao.save(loan);
     }
 
-
     public void requestExtension(int id, AppUser userRequester) {
         Loan loan = loanDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
