@@ -2,6 +2,7 @@ package com.mns.cda.locmnsback.services;
 
 import com.mns.cda.locmnsback.dao.EquipmentDao;
 import com.mns.cda.locmnsback.dao.LoanDao;
+import com.mns.cda.locmnsback.dto.EquipmentDto;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +19,41 @@ public class EquipmentService {
     private final EquipmentDao equipmentDao;
     private final LoanDao loanDao;
 
-    public List<Equipment> getAll() {
-        return equipmentDao.findAll();
+    public List<EquipmentDto> getAll() {
+        return equipmentDao.findAll()
+                .stream()
+                .map(e -> new EquipmentDto(
+                        e.getId(),
+                        e.getName(),
+                        e.getModel().getType().getId(),
+                        e.getModel().getType().getName(),
+                        e.getModel().getId(),
+                        e.getModel().getName(),
+                        e.getLocation().getId(),
+                        e.getLocation().getName(),
+                        e.getModel().getDescription()
+                ))
+                .toList();
     }
 
-    public Equipment get(int id) {
-        return equipmentDao.findById(id)
+    public EquipmentDto get(int id) {
+        Equipment e = equipmentDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Équipement introuvable"
                 ));
+
+        return new EquipmentDto(
+                        e.getId(),
+                        e.getName(),
+                        e.getModel().getType().getId(),
+                        e.getModel().getType().getName(),
+                        e.getModel().getId(),
+                        e.getModel().getName(),
+                        e.getLocation().getId(),
+                        e.getLocation().getName(),
+                        e.getModel().getDescription()
+        );
     }
 
     public List<LoanCalendarDto> getLoansForEquipment(int id) {
@@ -47,9 +73,21 @@ public class EquipmentService {
                 .toList();
     }
 
-    public Equipment create(Equipment equipmentToInsert) {
+    public EquipmentDto create(Equipment equipmentToInsert) {
         equipmentToInsert.setId(null);
-        return equipmentDao.save(equipmentToInsert);
+        Equipment e = equipmentDao.save(equipmentToInsert);
+
+        return new EquipmentDto(
+                e.getId(),
+                e.getName(),
+                e.getModel().getType().getId(),
+                e.getModel().getType().getName(),
+                e.getModel().getId(),
+                e.getModel().getName(),
+                e.getLocation().getId(),
+                e.getLocation().getName(),
+                e.getModel().getDescription()
+        );
     }
 
     public void delete(int id) {
@@ -62,13 +100,25 @@ public class EquipmentService {
         equipmentDao.delete(equipment);
     }
 
-    public void update (int id, Equipment equipmentToUpdate) {
+    public EquipmentDto update (int id, Equipment equipmentToUpdate) {
         Equipment existing = equipmentDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Équipement introuvable"
                 ));
         equipmentToUpdate.setId(existing.getId());
-        equipmentDao.save(equipmentToUpdate);
+        Equipment e = equipmentDao.save(equipmentToUpdate);
+
+        return new EquipmentDto(
+                e.getId(),
+                e.getName(),
+                e.getModel().getType().getId(),
+                e.getModel().getType().getName(),
+                e.getModel().getId(),
+                e.getModel().getName(),
+                e.getLocation().getId(),
+                e.getLocation().getName(),
+                e.getModel().getDescription()
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.mns.cda.locmnsback.controller;
 
+import com.mns.cda.locmnsback.dto.EquipmentDto;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.security.IsAdmin;
@@ -21,14 +22,14 @@ public class EquipmentController {
 
     @GetMapping("/equipment/list")
     @IsUser
-    public ResponseEntity<List<Equipment>> getAll() {
+    public ResponseEntity<List<EquipmentDto>> getAll() {
 
         return ResponseEntity.ok(equipmentService.getAll());
     }
 
     @GetMapping("/equipment/{id}")
     @IsUser
-    public ResponseEntity<Equipment> get(@PathVariable int id) {
+    public ResponseEntity<EquipmentDto> get(@PathVariable int id) {
 
         return ResponseEntity.ok(equipmentService.get(id));
     }
@@ -41,7 +42,7 @@ public class EquipmentController {
 
     @PostMapping("/equipment")
     @IsAdmin
-    public ResponseEntity<Equipment> create(@RequestBody Equipment equipmentToInsert) {
+    public ResponseEntity<EquipmentDto> create(@RequestBody Equipment equipmentToInsert) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -58,10 +59,8 @@ public class EquipmentController {
 
     @PutMapping("/equipment/{id}")
     @IsAdmin
-    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
+    public ResponseEntity<EquipmentDto> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
 
-        equipmentService.update(id, equipmentToUpdate);
-
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(equipmentService.update(id, equipmentToUpdate));
     }
 }
