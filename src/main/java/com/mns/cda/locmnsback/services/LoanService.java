@@ -1,9 +1,7 @@
 package com.mns.cda.locmnsback.services;
 
 import com.mns.cda.locmnsback.dao.*;
-import com.mns.cda.locmnsback.dto.LoanCreateDto;
-import com.mns.cda.locmnsback.dto.LoanHistoryDto;
-import com.mns.cda.locmnsback.dto.UserReservationDto;
+import com.mns.cda.locmnsback.dto.*;
 import com.mns.cda.locmnsback.enums.LoanStatus;
 import com.mns.cda.locmnsback.model.*;
 import lombok.RequiredArgsConstructor;
@@ -27,58 +25,194 @@ public class LoanService {
     private final LoanHistoryDao loanHistoryDao;
     private final EquipmentDao equipmentDao;
 
-    public Loan startLoan(int id) {
-        Loan loan = loanDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Prêt introuvable"
-                ));
+    private void addHistory(Loan loan, LoanStatus newStatus) {
+        LoanState state = loanStateDao.findByName(newStatus.name());
 
-        if (loan.getLoanStatus() != LoanStatus.VALIDATED) {
+        if (state == null) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le prêt ne peut pas être démarré car il n'est pas au statut VALIDATED.");
+                    HttpStatus.NOT_FOUND,
+                    "État de prêt introuvable pour le statut : " + newStatus.name());
         }
 
-        if (loan.getStartDate().isAfter(LocalDate.now())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Impossible de démarrer un prêt avant sa date de début.");
-        }
+        LoanHistory history = new LoanHistory();
+        history.setLoan(loan);
+        history.setLoanState(state);
+        history.setDateChangement(LocalDateTime.now());
 
-        loan.setLoanStatus(LoanStatus.ONGOING);
-        addHistory(loan, LoanStatus.ONGOING);
-
-        return loanDao.save(loan);
+        loanHistoryDao.save(history);
     }
 
-    public void requestExtension(int id, AppUser userRequester) {
-        Loan loan = loanDao.findById(id)
+    public List<UserReservationDto> getUserLoans(int id, AppUser userRequester) {
+        AppUser userTarget = appUserDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Prêt introuvable"
+                        "Utilisateur introuvable"
                 ));
 
         boolean isAdmin = userRequester.getRole().getName().equals("ADMIN");
-        boolean isOwner = userRequester.getId().equals(loan.getAppUser().getId());
+        boolean isSelf = userRequester.getId() == userTarget.getId();
 
-        if (!isAdmin && !isOwner) {
+        if (!isAdmin && !isSelf) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Vous ne pouvez pas demander une extension de ce prêt."
+                    "Accès refusé"
             );
         }
 
-        if (loan.getLoanStatus() != LoanStatus.ONGOING
-                && loan.getLoanStatus() != LoanStatus.VALIDATED) {
+        return loanDao.findByAppUserId(id)
+                .stream()
+                .map(l -> new UserReservationDto(
+                        l.getId(),
+                        l.getEquipment().getId(),
+                        l.getEquipment().getModel().getType().getId(),
+                        l.getEquipment().getName(),
+                        l.getStartDate(),
+                        l.getEndDate(),
+                        l.getLoanStatus().name()
+                ))
+                .toList();
+
+    }
+
+    public List<LoanDto> getAll() {
+        return loanDao.findAll()
+                .stream()
+                .map(l -> new LoanDto(
+                    l.getId(),
+                    l.getStartDate(),
+                    l.getEndDate(),
+                    l.getLoanStatus().name(),
+                    l.getEquipment().getId(),
+                    l.getEquipment().getName(),
+                    l.getAppUser().getId(),
+                    l.getAppUser().getName(),
+                    l.getAppUser().getFirstName()
+                ))
+                .toList();
+    }
+
+    public LoanDto get(int id) {
+        Loan l = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prêt introuvable"
+                ));
+
+        return new LoanDto(
+                l.getId(),
+                l.getStartDate(),
+                l.getEndDate(),
+                l.getLoanStatus().name(),
+                l.getEquipment().getId(),
+                l.getEquipment().getName(),
+                l.getAppUser().getId(),
+                l.getAppUser().getName(),
+                l.getAppUser().getFirstName()
+        );
+    }
+
+    public List<LoanDto> getByStatus(LoanStatus status) {
+       List<Loan> loans = (status == null)
+               ? loanDao.findAll()
+               : loanDao.findByLoanStatus(status);
+
+        return loans.stream()
+                .map(l -> new LoanDto(
+                        l.getId(),
+                        l.getStartDate(),
+                        l.getEndDate(),
+                        l.getLoanStatus().name(),
+                        l.getEquipment().getId(),
+                        l.getEquipment().getName(),
+                        l.getAppUser().getId(),
+                        l.getAppUser().getName(),
+                        l.getAppUser().getFirstName()
+                ))
+                .toList();
+    }
+
+    public List<LoanHistoryDto> getLoanHistory(int id) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prêt introuvable"
+                ));
+
+        return loan.getHistory()
+                .stream()
+                .map(h -> new LoanHistoryDto(
+                        loan.getId(),
+                        h.getDateChangement().toLocalDate(),
+                        h.getLoanState().getName()
+                ))
+                .toList();
+    }
+
+    public LoanDto create(LoanCreateDto dto) {
+        LocalDate startDate = dto.startDate();
+        LocalDate endDate = dto.endDate();
+
+        if(startDate.isBefore(LocalDate.now())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Impossible de demander une prolongation : le prêt n'est pas en cours.");
+                    "La date de début du prêt ne peux pas être dans le passé."
+            );
         }
 
-        loan.setLoanStatus(LoanStatus.REQUESTED_EXTENSION);
-        addHistory(loan, LoanStatus.REQUESTED_EXTENSION);
-        loanDao.save(loan);
+        if(endDate.isBefore(startDate)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La date de fin du prêt doit être après la date de début."
+            );
+        }
+
+        Equipment equipment = equipmentDao.findById(dto.equipmentId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Équipement introuvable"
+                ));
+
+        AppUser user = appUserDao.findById(dto.appUserId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Utilisateur introuvable"
+                ));
+
+        List<Loan> existingLoan = loanDao.findByEquipmentId(dto.equipmentId());
+        for (Loan existing : existingLoan) {
+            boolean overlap =
+                    !startDate.isAfter(existing.getEndDate()) &&
+                            !endDate.isBefore(existing.getStartDate());
+
+            if (overlap) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "L'équipement est déjà réservé du " + existing.getStartDate() + " au " + existing.getEndDate()
+                );
+            }
+        }
+
+        Loan loan = new Loan();
+        loan.setStartDate(startDate);
+        loan.setEndDate(endDate);
+        loan.setEquipment(equipment);
+        loan.setAppUser(user);
+        loan.setLoanStatus(LoanStatus.VALIDATED);
+
+        Loan saved = loanDao.save(loan);
+
+        return new LoanDto(
+                saved.getId(),
+                saved.getStartDate(),
+                saved.getEndDate(),
+                saved.getLoanStatus().name(),
+                saved.getEquipment().getId(),
+                saved.getEquipment().getName(),
+                saved.getAppUser().getId(),
+                saved.getAppUser().getName(),
+                saved.getAppUser().getFirstName()
+        );
+
     }
 
     public void requestReturn(int id, AppUser userRequester) {
@@ -111,7 +245,123 @@ public class LoanService {
         loanDao.save(loan);
     }
 
-    public Loan extendLoan(Integer id, LocalDate newEndDate) {
+    public void requestExtension(int id, AppUser userRequester) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prêt introuvable"
+                ));
+
+        boolean isAdmin = userRequester.getRole().getName().equals("ADMIN");
+        boolean isOwner = userRequester.getId().equals(loan.getAppUser().getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Vous ne pouvez pas demander une extension de ce prêt."
+            );
+        }
+
+        if (loan.getLoanStatus() != LoanStatus.ONGOING
+                && loan.getLoanStatus() != LoanStatus.VALIDATED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Impossible de demander une prolongation : le prêt n'est pas en cours.");
+        }
+
+        loan.setLoanStatus(LoanStatus.REQUESTED_EXTENSION);
+        addHistory(loan, LoanStatus.REQUESTED_EXTENSION);
+        loanDao.save(loan);
+    }
+
+    public void delete(int id) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prêt introuvable"
+                ));
+
+        loanDao.delete(loan);
+
+    }
+
+    public LoanDto update(int id, LoanUpdateDto loanToUpdate) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prêt introuvable"
+                ));
+
+        if (loan.getStartDate().isBefore(LocalDate.now())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Impossible de modifier un prêt déjà commencé."
+            );
+        }
+
+        if (loanToUpdate.startDate().isAfter(loanToUpdate.endDate())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La date de fin doit être après la date de début."
+            );
+        }
+
+        loan.setStartDate(loanToUpdate.startDate());
+        loan.setEndDate(loanToUpdate.endDate());
+
+        Loan saved = loanDao.save(loan);
+
+        return new LoanDto(
+                saved.getId(),
+                saved.getStartDate(),
+                saved.getEndDate(),
+                saved.getLoanStatus().name(),
+                saved.getEquipment().getId(),
+                saved.getEquipment().getName(),
+                saved.getAppUser().getId(),
+                saved.getAppUser().getName(),
+                saved.getAppUser().getFirstName()
+        );
+    }
+
+    public LoanDto startLoan(int id) {
+        Loan loan = loanDao.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prêt introuvable"
+                ));
+
+        if (loan.getLoanStatus() != LoanStatus.VALIDATED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Le prêt ne peut pas être démarré car il n'est pas au statut VALIDATED.");
+        }
+
+        if (loan.getStartDate().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Impossible de démarrer un prêt avant sa date de début.");
+        }
+
+        loan.setLoanStatus(LoanStatus.ONGOING);
+        addHistory(loan, LoanStatus.ONGOING);
+
+        Loan saved = loanDao.save(loan);
+
+        return new LoanDto(
+                saved.getId(),
+                saved.getStartDate(),
+                saved.getEndDate(),
+                saved.getLoanStatus().name(),
+                saved.getEquipment().getId(),
+                saved.getEquipment().getName(),
+                saved.getAppUser().getId(),
+                saved.getAppUser().getName(),
+                saved.getAppUser().getFirstName()
+        );
+    }
+
+    public LoanDto extendLoan(Integer id, LocalDate newEndDate) {
         Loan loan = loanDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -161,10 +411,22 @@ public class LoanService {
 
         addHistory(loan, loan.getLoanStatus());
 
-        return loanDao.save(loan);
+        Loan saved = loanDao.save(loan);
+
+        return new LoanDto(
+                saved.getId(),
+                saved.getStartDate(),
+                saved.getEndDate(),
+                saved.getLoanStatus().name(),
+                saved.getEquipment().getId(),
+                saved.getEquipment().getName(),
+                saved.getAppUser().getId(),
+                saved.getAppUser().getName(),
+                saved.getAppUser().getFirstName()
+        );
     }
 
-    public Loan validateReturn(int id) {
+    public LoanDto validateReturn(int id) {
         Loan loan = loanDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -181,179 +443,18 @@ public class LoanService {
         loan.setLoanStatus(LoanStatus.RETURNED);
         addHistory(loan, LoanStatus.RETURNED);
 
-        return loanDao.save(loan);
-    }
-
-    private void addHistory(Loan loan, LoanStatus newStatus) {
-        LoanState state = loanStateDao.findByName(newStatus.name());
-
-        if (state == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "État de prêt introuvable pour le statut : " + newStatus.name());
-        }
-
-        LoanHistory history = new LoanHistory();
-        history.setLoan(loan);
-        history.setLoanState(state);
-        history.setDateChangement(LocalDateTime.now());
-
-        loanHistoryDao.save(history);
-    }
-    @Transactional
-    public Loan createLoan(Loan loan) {
-        loan.setLoanStatus(LoanStatus.VALIDATED);
         Loan saved = loanDao.save(loan);
-        addHistory(saved, LoanStatus.VALIDATED);
 
-        return saved;
+        return new LoanDto(
+                saved.getId(),
+                saved.getStartDate(),
+                saved.getEndDate(),
+                saved.getLoanStatus().name(),
+                saved.getEquipment().getId(),
+                saved.getEquipment().getName(),
+                saved.getAppUser().getId(),
+                saved.getAppUser().getName(),
+                saved.getAppUser().getFirstName()
+        );
     }
-
-    public List<UserReservationDto> getUserLoans(int id, AppUser userRequester) {
-        AppUser userTarget = appUserDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Utilisateur introuvable"
-                ));
-
-        boolean isAdmin = userRequester.getRole().getName().equals("ADMIN");
-        boolean isSelf = userRequester.getId() == userTarget.getId();
-
-        if (!isAdmin && !isSelf) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Accès refusé"
-            );
-        }
-
-        return loanDao.findByAppUserId(id)
-                .stream()
-                .map(l -> new UserReservationDto(
-                        l.getId(),
-                        l.getEquipment().getId(),
-                        l.getEquipment().getModel().getType().getId(),
-                        l.getEquipment().getName(),
-                        l.getStartDate(),
-                        l.getEndDate(),
-                        l.getLoanStatus().name()
-                ))
-                .toList();
-
-    }
-
-    public List<Loan> getAll() {
-        return loanDao.findAll();
-    }
-
-    public Loan get(int id) {
-        return loanDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Prêt introuvable"
-                ));
-    }
-
-    public List<Loan> getByStatus(LoanStatus status) {
-        if (status == null) {
-            return loanDao.findAll();
-        }
-
-        return loanDao.findByLoanStatus(status);
-    }
-
-    public List<LoanHistoryDto> getLoanHistory(int id) {
-        Loan loan = loanDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Prêt introuvable"
-                ));
-
-        return loan.getHistory()
-                .stream()
-                .map(h -> new LoanHistoryDto(
-                        loan.getId(),
-                        h.getDateChangement().toLocalDate(),
-                        h.getLoanState().getName()
-                ))
-                .toList();
-    }
-
-    public void delete(int id) {
-        Loan loan = loanDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Prêt introuvable"
-                ));
-
-        loanDao.delete(loan);
-
-    }
-
-    public void update(int id, Loan loanToUpdate) {
-        Loan existing = loanDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Prêt introuvable"
-                ));
-
-        loanToUpdate.setId(existing.getId());
-
-        loanDao.save(loanToUpdate);
-    }
-
-    public Loan create(LoanCreateDto dto) {
-        LocalDate startDate = dto.startDate();
-        LocalDate endDate = dto.endDate();
-
-        if(startDate.isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "La date de début du prêt ne peux pas être dans le passé."
-            );
-        }
-
-        if(endDate.isBefore(startDate)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "La date de fin du prêt doit être après la date de début."
-            );
-        }
-
-        Equipment equipment = equipmentDao.findById(dto.equipmentId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Équipement introuvable"
-                ));
-
-        AppUser user = appUserDao.findById(dto.appUserId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Utilisateur introuvable"
-                ));
-
-        List<Loan> existingLoan = loanDao.findByEquipmentId(dto.equipmentId());
-        for (Loan existing : existingLoan) {
-            boolean overlap =
-                    !startDate.isAfter(existing.getEndDate()) &&
-                    !endDate.isBefore(existing.getStartDate());
-
-            if (overlap) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "L'équipement est déjà réservé du " + existing.getStartDate() + " au " + existing.getEndDate()
-                );
-            }
-        }
-
-        Loan loan = new Loan();
-        loan.setStartDate(startDate);
-        loan.setEndDate(endDate);
-        loan.setEquipment(equipment);
-        loan.setAppUser(user);
-        loan.setLoanStatus(LoanStatus.VALIDATED);
-
-        return loanDao.save(loan);
-
-    }
-
 }

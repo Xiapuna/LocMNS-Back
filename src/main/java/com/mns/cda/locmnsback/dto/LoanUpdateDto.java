@@ -2,7 +2,8 @@ package com.mns.cda.locmnsback.dto;
 
 import java.time.LocalDate;
 
-public record LoanCalendarDto(
+public record LoanUpdateDto(
         LocalDate startDate,
-        LocalDate endDate) {
+        LocalDate endDate
+) {
 }

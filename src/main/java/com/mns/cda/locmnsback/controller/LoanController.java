@@ -1,9 +1,7 @@
 package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.LoanDao;
-import com.mns.cda.locmnsback.dto.LoanCreateDto;
-import com.mns.cda.locmnsback.dto.LoanExtensionDto;
-import com.mns.cda.locmnsback.dto.LoanHistoryDto;
+import com.mns.cda.locmnsback.dto.*;
 import com.mns.cda.locmnsback.enums.LoanStatus;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.model.Equipment;
@@ -34,27 +32,21 @@ public class LoanController {
 
     @GetMapping("/loan/list")
     @IsUser
-    public ResponseEntity<List<Loan>> getAll() {
+    public ResponseEntity<List<LoanDto>> getAll() {
         return ResponseEntity.ok(loanService.getAll());
     }
 
     @GetMapping("/loan/{id}")
     @IsUser
-    public ResponseEntity<Loan> get(@PathVariable int id) {
+    public ResponseEntity<LoanDto> get(@PathVariable int id) {
+
         return ResponseEntity.ok(loanService.get(id));
     }
 
     @GetMapping("/loans")
     @IsAdmin
-    public ResponseEntity<List<Loan>> getByStatus(@RequestParam(required = false) LoanStatus status) {
+    public ResponseEntity<List<LoanDto>> getByStatus(@RequestParam(required = false) LoanStatus status) {
         return ResponseEntity.ok(loanService.getByStatus(status));
-    }
-
-    @GetMapping("/loans/{id}")
-    @IsUser
-    public Loan getLoanAdmin(@PathVariable int id) {
-        return loanDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/loans/{id}/history")
@@ -65,7 +57,7 @@ public class LoanController {
 
     @PostMapping("/loan")
     @IsUser
-    public ResponseEntity<?> create(@RequestBody LoanCreateDto loanCreateDto) {
+    public ResponseEntity<LoanDto> create(@RequestBody LoanCreateDto loanCreateDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(loanService.create(loanCreateDto));
@@ -96,28 +88,26 @@ public class LoanController {
 
     @PutMapping("/loan/{id}")
     @IsAdmin
-    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Loan loanToUpdate) {
-
-        loanService.update(id, loanToUpdate);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<LoanDto> update(@PathVariable int id, @RequestBody LoanUpdateDto loanToUpdate) {
+        return ResponseEntity.ok(loanService.update(id, loanToUpdate));
     }
 
     @PutMapping("/loans/{id}/start")
     @IsUser
-    public ResponseEntity<Loan> startLoan(@PathVariable int id) {
+    public ResponseEntity<LoanDto> startLoan(@PathVariable int id) {
 
         return ResponseEntity.ok(loanService.startLoan(id));
     }
 
     @PutMapping("/loans/{id}/extend")
     @IsAdmin
-    public ResponseEntity<Loan> extendLoan(@PathVariable int id, @RequestBody LoanExtensionDto dto) {
+    public ResponseEntity<LoanDto> extendLoan(@PathVariable int id, @RequestBody LoanExtensionDto dto) {
         return ResponseEntity.ok(loanService.extendLoan(id, dto.newEndDate()));
     }
 
     @PutMapping("/loans/{id}/return")
     @IsAdmin
-    public ResponseEntity<Loan> validateReturn(@PathVariable int id)
+    public ResponseEntity<LoanDto> validateReturn(@PathVariable int id)
     {
         return ResponseEntity.ok(loanService.validateReturn(id));
     }
