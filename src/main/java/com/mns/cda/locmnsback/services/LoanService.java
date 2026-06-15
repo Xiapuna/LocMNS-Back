@@ -285,7 +285,7 @@ public class LoanService {
 
     }
 
-    public LoanDto update(int id, LoanUpdateDto loanToUpdate) {
+    public LoanDto update(int id, LoanUpdateDto dto) {
         Loan loan = loanDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -299,15 +299,15 @@ public class LoanService {
             );
         }
 
-        if (loanToUpdate.startDate().isAfter(loanToUpdate.endDate())) {
+        if (dto.startDate().isAfter(dto.endDate())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La date de fin doit être après la date de début."
             );
         }
 
-        loan.setStartDate(loanToUpdate.startDate());
-        loan.setEndDate(loanToUpdate.endDate());
+        loan.setStartDate(dto.startDate());
+        loan.setEndDate(dto.endDate());
 
         Loan saved = loanDao.save(loan);
 

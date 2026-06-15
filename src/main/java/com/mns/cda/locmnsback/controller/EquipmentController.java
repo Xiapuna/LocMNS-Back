@@ -1,6 +1,8 @@
 package com.mns.cda.locmnsback.controller;
 
+import com.mns.cda.locmnsback.dto.EquipmentCreateDto;
 import com.mns.cda.locmnsback.dto.EquipmentDto;
+import com.mns.cda.locmnsback.dto.EquipmentUpdateDto;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.security.IsAdmin;
@@ -42,7 +44,7 @@ public class EquipmentController {
 
     @PostMapping("/equipment")
     @IsAdmin
-    public ResponseEntity<EquipmentDto> create(@RequestBody Equipment equipmentToInsert) {
+    public ResponseEntity<EquipmentDto> create(@RequestBody EquipmentCreateDto equipmentToInsert) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -59,7 +61,7 @@ public class EquipmentController {
 
     @PutMapping("/equipment/{id}")
     @IsAdmin
-    public ResponseEntity<EquipmentDto> update(@PathVariable int id, @RequestBody Equipment equipmentToUpdate) {
+    public ResponseEntity<EquipmentDto> update(@PathVariable int id, @RequestBody EquipmentUpdateDto equipmentToUpdate) {
 
         return ResponseEntity.ok(equipmentService.update(id, equipmentToUpdate));
     }

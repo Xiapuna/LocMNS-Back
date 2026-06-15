@@ -1,10 +1,13 @@
 package com.mns.cda.locmnsback.services;
 
-import com.mns.cda.locmnsback.dao.EquipmentDao;
-import com.mns.cda.locmnsback.dao.LoanDao;
+import com.mns.cda.locmnsback.dao.*;
+import com.mns.cda.locmnsback.dto.EquipmentCreateDto;
 import com.mns.cda.locmnsback.dto.EquipmentDto;
+import com.mns.cda.locmnsback.dto.EquipmentUpdateDto;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
 import com.mns.cda.locmnsback.model.Equipment;
+import com.mns.cda.locmnsback.model.Location;
+import com.mns.cda.locmnsback.model.Model;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ public class EquipmentService {
 
     private final EquipmentDao equipmentDao;
     private final LoanDao loanDao;
+    private final ModelDao modelDao;
+    private final LocationDao locationDao;
 
     public List<EquipmentDto> getAll() {
         return equipmentDao.findAll()
@@ -29,9 +34,9 @@ public class EquipmentService {
                         e.getModel().getType().getName(),
                         e.getModel().getId(),
                         e.getModel().getName(),
+                        e.getModel().getDescription(),
                         e.getLocation().getId(),
-                        e.getLocation().getName(),
-                        e.getModel().getDescription()
+                        e.getLocation().getName()
                 ))
                 .toList();
     }
@@ -50,9 +55,9 @@ public class EquipmentService {
                         e.getModel().getType().getName(),
                         e.getModel().getId(),
                         e.getModel().getName(),
+                        e.getModel().getDescription(),
                         e.getLocation().getId(),
-                        e.getLocation().getName(),
-                        e.getModel().getDescription()
+                        e.getLocation().getName()
         );
     }
 
@@ -73,9 +78,27 @@ public class EquipmentService {
                 .toList();
     }
 
-    public EquipmentDto create(Equipment equipmentToInsert) {
-        equipmentToInsert.setId(null);
-        Equipment e = equipmentDao.save(equipmentToInsert);
+    public EquipmentDto create(EquipmentCreateDto dto) {
+
+        Model model = modelDao.findById(dto.modelId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Model introuvable"
+                ));
+
+        Location location = locationDao.findById(dto.locationId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Localisation introuvable"
+                ));
+
+        Equipment equipment = new Equipment();
+        equipment.setId(null);
+        equipment.setName(dto.name());
+        equipment.setModel(model);
+        equipment.setLocation(location);
+
+        Equipment e = equipmentDao.save(equipment);
 
         return new EquipmentDto(
                 e.getId(),
@@ -84,9 +107,9 @@ public class EquipmentService {
                 e.getModel().getType().getName(),
                 e.getModel().getId(),
                 e.getModel().getName(),
+                e.getModel().getDescription(),
                 e.getLocation().getId(),
-                e.getLocation().getName(),
-                e.getModel().getDescription()
+                e.getLocation().getName()
         );
     }
 
@@ -100,14 +123,30 @@ public class EquipmentService {
         equipmentDao.delete(equipment);
     }
 
-    public EquipmentDto update (int id, Equipment equipmentToUpdate) {
+    public EquipmentDto update (int id, EquipmentUpdateDto dto) {
         Equipment existing = equipmentDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Équipement introuvable"
                 ));
-        equipmentToUpdate.setId(existing.getId());
-        Equipment e = equipmentDao.save(equipmentToUpdate);
+
+        Model model = modelDao.findById(dto.modelId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Model introuvable"
+                ));
+
+        Location location = locationDao.findById(dto.locationId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Localisation introuvable"
+                ));
+
+        existing.setName(dto.name());
+        existing.setModel(model);
+        existing.setLocation(location);
+
+        Equipment e = equipmentDao.save(existing);
 
         return new EquipmentDto(
                 e.getId(),
@@ -116,9 +155,9 @@ public class EquipmentService {
                 e.getModel().getType().getName(),
                 e.getModel().getId(),
                 e.getModel().getName(),
+                e.getModel().getDescription(),
                 e.getLocation().getId(),
-                e.getLocation().getName(),
-                e.getModel().getDescription()
+                e.getLocation().getName()
         );
     }
 }

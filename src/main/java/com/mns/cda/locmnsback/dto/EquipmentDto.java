@@ -7,8 +7,8 @@ public record EquipmentDto(
         String typeName,
         int modelId,
         String modelName,
+        String modelDescription,
         int locationId,
-        String locationName,
-        String description
+        String locationName
 ) {
 }
