@@ -1,6 +1,9 @@
 package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.AppUserDao;
+import com.mns.cda.locmnsback.dto.AppUserCreateDto;
+import com.mns.cda.locmnsback.dto.AppUserDto;
+import com.mns.cda.locmnsback.dto.AppUserUpdateDto;
 import com.mns.cda.locmnsback.dto.UserReservationDto;
 import com.mns.cda.locmnsback.model.AppUser;
 import com.mns.cda.locmnsback.security.AppUserDetails;
@@ -29,14 +32,16 @@ public class AppUserController {
 
     @GetMapping("/appuser/list")
     @IsAdmin
-    public List<AppUser> getAll() {
-        return appUserDao.findAll();
+    public ResponseEntity<List<AppUserDto>> getAll() {
+
+        return ResponseEntity.ok(userService.getAll());
     }
 
     @GetMapping("/appuser/{id}")
     @IsUser
-    public ResponseEntity<AppUser> get(@PathVariable int id) {
-        return ResponseEntity.ok(userService.getById(id));
+    public ResponseEntity<AppUserDto> get(@PathVariable int id) {
+
+        return ResponseEntity.ok(userService.get(id));
     }
 
     @GetMapping("/appuser/{id}/loans")
@@ -48,27 +53,26 @@ public class AppUserController {
     }
 
     @PostMapping("/appuser")
-    @IsUser
-    public ResponseEntity<AppUser> create(@RequestBody AppUser userToInsert) {
+    @IsAdmin
+    public ResponseEntity<AppUserDto> create(@RequestBody AppUserCreateDto userToInsert) {
 
-        userService.insert(userToInsert);
-
-        return new ResponseEntity<>(userToInsert, HttpStatus.CREATED);
+        AppUserDto created = userService.create(userToInsert);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @DeleteMapping("/appuser/{id}")
     @IsAdmin
-    public ResponseEntity<AppUser> delete(@PathVariable int id) {
+    public ResponseEntity<AppUserDto> delete(@PathVariable int id) {
 
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/appuser/{id}")
-    @IsUser
-    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody AppUser appUserToUpdate) {
+    @IsAdmin
+    public ResponseEntity<AppUserDto> update(@PathVariable int id, @RequestBody AppUserUpdateDto userToUpdate) {
 
-        userService.update(id, appUserToUpdate);
-        return ResponseEntity.noContent().build();
+        AppUserDto update = userService.update(id, userToUpdate);
+        return ResponseEntity.ok(update);
     }
 }
