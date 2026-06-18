@@ -1,7 +1,11 @@
 package com.mns.cda.locmnsback.controller;
 
 import com.mns.cda.locmnsback.dao.LoanStateDao;
+import com.mns.cda.locmnsback.dto.LoanStateCreateDto;
+import com.mns.cda.locmnsback.dto.LoanStateDto;
+import com.mns.cda.locmnsback.dto.LoanStateUpdateDto;
 import com.mns.cda.locmnsback.model.LoanState;
+import com.mns.cda.locmnsback.services.LoanStateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,61 +19,34 @@ import java.util.Optional;
 @CrossOrigin
 public class LoanStateController {
 
-    protected final LoanStateDao loanStateDao;
+    protected final LoanStateService loanStateService;
 
     @GetMapping("/state/list")
-    public List<LoanState> getAll() {
-        return loanStateDao.findAll();
+    public ResponseEntity<List<LoanStateDto>> getAll() {
+        return ResponseEntity.ok(loanStateService.getAll());
     }
-
     @GetMapping("/state/{id}")
-    public ResponseEntity<LoanState> get(@PathVariable int id) {
-
-        Optional<LoanState> optionalState = loanStateDao.findById(id);
-
-        if(optionalState.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(optionalState.get(), HttpStatus.OK);
+    public ResponseEntity<LoanStateDto> get(@PathVariable int id) {
+        return ResponseEntity.ok(loanStateService.get(id));
     }
 
     @PostMapping("/state")
-    public ResponseEntity<LoanState> create(@RequestBody LoanState loanStateToInsert) {
+    public ResponseEntity<LoanStateDto> create(@RequestBody LoanStateCreateDto loanStateToInsert) {
 
-        loanStateToInsert.setId(null);
-
-        loanStateDao.save(loanStateToInsert);
-
-        return new ResponseEntity<>(loanStateToInsert, HttpStatus.CREATED);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(loanStateService.create(loanStateToInsert));
     }
 
     @DeleteMapping("/state/{id}")
-    public ResponseEntity<LoanState> delete(@PathVariable int id) {
-        Optional<LoanState> optionalState = loanStateDao.findById(id);
-
-        if(optionalState.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        loanStateDao.deleteById(id);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> delete(@PathVariable int id) {
+        loanStateService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/state/{id}")
-    public ResponseEntity<LoanState> update(@PathVariable int id, @RequestBody LoanState loanStateToUpdate) {
-        Optional<LoanState> optionalState = loanStateDao.findById(id);
-
-        if(optionalState.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        loanStateToUpdate.setId(id);
-
-        loanStateDao.save(loanStateToUpdate);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<LoanStateDto> update(@PathVariable int id, @RequestBody LoanStateUpdateDto loanStateToUpdate) {
+        return ResponseEntity.ok(loanStateService.update(id, loanStateToUpdate));
     }
 }
 
