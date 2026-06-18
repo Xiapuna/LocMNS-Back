@@ -1,69 +1,44 @@
 package com.mns.cda.locmnsback.controller;
 
-import com.mns.cda.locmnsback.model.AppUser;
-import com.mns.cda.locmnsback.security.AppUserDetails;
-import com.mns.cda.locmnsback.services.AppUserService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.mns.cda.locmnsback.dto.AuthLoginDto;
+import com.mns.cda.locmnsback.dto.AuthResponseDto;
+import com.mns.cda.locmnsback.dto.AuthSignInDto;
+import com.mns.cda.locmnsback.services.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin
 public class AuthController {
 
-    @Value("${jwt.secret}")
-    protected String jwtSecret;
-
-    private final AppUserService userService;
-    private final AuthenticationProvider authenticationProvider;
+    private final AuthService authService;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<AppUser> signIn(
+    public ResponseEntity<Void> signIn(
             @RequestBody
-//            @Validated(AppUser.OnCreate.class)
-            AppUser userToInsert) {
+            AuthSignInDto userToInsert) {
 
-        userService.insert(userToInsert);
+        authService.signIn(userToInsert);
 
-        return new ResponseEntity<>(userToInsert, HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
 
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AppUser user) {
+    public ResponseEntity<AuthResponseDto> login(@RequestBody AuthLoginDto user) {
 
         try {
-            AppUserDetails appUser = (AppUserDetails) authenticationProvider
-                    .authenticate(new UsernamePasswordAuthenticationToken(
-                            user.getEmail(),
-                            user.getPassword()))
-                    .getPrincipal();
-            String jwt = Jwts.builder()
-                    .setSubject(user.getEmail())
-                    .addClaims(Map.of("role", appUser.getUser().getRole().getName(),
-                            "id", appUser.getUser().getId(),
-                            "firstname", appUser.getUser().getFirstName(),
-                            "name", appUser.getUser().getName())) // Pour un ManyToMany .addClaims(Map.of("roles", user.getRoles().stream().map(RoleEnum r -> r.getName()).collect(Collectors.joining(",")))
-                    .signWith(SignatureAlgorithm.HS256, jwtSecret)
-                    .compact();
-
-            return new ResponseEntity<>(jwt, HttpStatus.OK);
-        } catch (AuthenticationException e){
-
+            return ResponseEntity.ok(authService.login(user));
+        } catch (AuthenticationException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
         }
     }
 }
