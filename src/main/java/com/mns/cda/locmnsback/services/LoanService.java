@@ -7,12 +7,11 @@ import com.mns.cda.locmnsback.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.xml.parsers.SAXParser;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,6 +23,18 @@ public class LoanService {
     private final LoanStateDao loanStateDao;
     private final LoanHistoryDao loanHistoryDao;
     private final EquipmentDao equipmentDao;
+
+    // --- NOUVELLE MÉTHODE OUTIL ---
+    // Permet de récupérer le statut actuel en lisant le dernier historique
+    private LoanStatus getCurrentStatus(Loan loan) {
+        if (loan.getHistory() == null || loan.getHistory().isEmpty()) {
+            return null;
+        }
+        return loan.getHistory().stream()
+                .max(Comparator.comparing(LoanHistory::getDateChangement))
+                .map(h -> LoanStatus.valueOf(h.getLoanState().getName()))
+                .orElse(null);
+    }
 
     private void addHistory(Loan loan, LoanStatus newStatus) {
         LoanState state = loanStateDao.findByName(newStatus.name());
@@ -40,6 +51,9 @@ public class LoanService {
         history.setDateChangement(LocalDateTime.now());
 
         loanHistoryDao.save(history);
+
+        // On l'ajoute à la liste en mémoire pour que les DTO soient à jour instantanément
+        loan.getHistory().add(history);
     }
 
     public List<UserReservationDto> getUserLoans(int id, AppUser userRequester) {
@@ -50,7 +64,7 @@ public class LoanService {
                 ));
 
         boolean isAdmin = userRequester.getRole().getName().equals("ADMIN");
-        boolean isSelf = userRequester.getId() == userTarget.getId();
+        boolean isSelf = userRequester.getId().equals(userTarget.getId());
 
         if (!isAdmin && !isSelf) {
             throw new ResponseStatusException(
@@ -68,7 +82,7 @@ public class LoanService {
                         l.getEquipment().getName(),
                         l.getStartDate(),
                         l.getEndDate(),
-                        l.getLoanStatus().name()
+                        getCurrentStatus(l) != null ? getCurrentStatus(l).name() : "UNKNOWN"
                 ))
                 .toList();
 
@@ -78,15 +92,15 @@ public class LoanService {
         return loanDao.findAll()
                 .stream()
                 .map(l -> new LoanDto(
-                    l.getId(),
-                    l.getStartDate(),
-                    l.getEndDate(),
-                    l.getLoanStatus().name(),
-                    l.getEquipment().getId(),
-                    l.getEquipment().getName(),
-                    l.getAppUser().getId(),
-                    l.getAppUser().getName(),
-                    l.getAppUser().getFirstName()
+                        l.getId(),
+                        l.getStartDate(),
+                        l.getEndDate(),
+                        getCurrentStatus(l) != null ? getCurrentStatus(l).name() : "UNKNOWN",
+                        l.getEquipment().getId(),
+                        l.getEquipment().getName(),
+                        l.getAppUser().getId(),
+                        l.getAppUser().getName(),
+                        l.getAppUser().getFirstName()
                 ))
                 .toList();
     }
@@ -102,7 +116,7 @@ public class LoanService {
                 l.getId(),
                 l.getStartDate(),
                 l.getEndDate(),
-                l.getLoanStatus().name(),
+                getCurrentStatus(l) != null ? getCurrentStatus(l).name() : "UNKNOWN",
                 l.getEquipment().getId(),
                 l.getEquipment().getName(),
                 l.getAppUser().getId(),
@@ -112,16 +126,21 @@ public class LoanService {
     }
 
     public List<LoanDto> getByStatus(LoanStatus status) {
-       List<Loan> loans = (status == null)
-               ? loanDao.findAll()
-               : loanDao.findByLoanStatus(status);
+        List<Loan> allLoans = loanDao.findAll();
 
-        return loans.stream()
+        // On filtre en Java car le statut n'est plus une simple colonne en base de données
+        if (status != null) {
+            allLoans = allLoans.stream()
+                    .filter(l -> getCurrentStatus(l) == status)
+                    .toList();
+        }
+
+        return allLoans.stream()
                 .map(l -> new LoanDto(
                         l.getId(),
                         l.getStartDate(),
                         l.getEndDate(),
-                        l.getLoanStatus().name(),
+                        getCurrentStatus(l) != null ? getCurrentStatus(l).name() : "UNKNOWN",
                         l.getEquipment().getId(),
                         l.getEquipment().getName(),
                         l.getAppUser().getId(),
@@ -197,15 +216,18 @@ public class LoanService {
         loan.setEndDate(endDate);
         loan.setEquipment(equipment);
         loan.setAppUser(user);
-        loan.setLoanStatus(LoanStatus.VALIDATED);
 
+        // On sauvegarde d'abord le prêt pour qu'il ait un ID en base de données
         Loan saved = loanDao.save(loan);
+
+        // Puis on lui ajoute son statut initial via l'historique
+        addHistory(saved, LoanStatus.VALIDATED);
 
         return new LoanDto(
                 saved.getId(),
                 saved.getStartDate(),
                 saved.getEndDate(),
-                saved.getLoanStatus().name(),
+                getCurrentStatus(saved).name(),
                 saved.getEquipment().getId(),
                 saved.getEquipment().getName(),
                 saved.getAppUser().getId(),
@@ -232,16 +254,14 @@ public class LoanService {
             );
         }
 
-        if (loan.getLoanStatus() != LoanStatus.ONGOING
-                && loan.getLoanStatus() != LoanStatus.VALIDATED) {
+        LoanStatus currentStatus = getCurrentStatus(loan);
+        if (currentStatus != LoanStatus.ONGOING && currentStatus != LoanStatus.VALIDATED) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Impossible de demander un retour : le prêt n'est pas en cours.");
         }
 
-        loan.setLoanStatus(LoanStatus.REQUESTED_RETURN);
         addHistory(loan, LoanStatus.REQUESTED_RETURN);
-
         loanDao.save(loan);
     }
 
@@ -262,14 +282,13 @@ public class LoanService {
             );
         }
 
-        if (loan.getLoanStatus() != LoanStatus.ONGOING
-                && loan.getLoanStatus() != LoanStatus.VALIDATED) {
+        LoanStatus currentStatus = getCurrentStatus(loan);
+        if (currentStatus != LoanStatus.ONGOING && currentStatus != LoanStatus.VALIDATED) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Impossible de demander une prolongation : le prêt n'est pas en cours.");
         }
 
-        loan.setLoanStatus(LoanStatus.REQUESTED_EXTENSION);
         addHistory(loan, LoanStatus.REQUESTED_EXTENSION);
         loanDao.save(loan);
     }
@@ -315,7 +334,7 @@ public class LoanService {
                 saved.getId(),
                 saved.getStartDate(),
                 saved.getEndDate(),
-                saved.getLoanStatus().name(),
+                getCurrentStatus(saved).name(),
                 saved.getEquipment().getId(),
                 saved.getEquipment().getName(),
                 saved.getAppUser().getId(),
@@ -331,7 +350,7 @@ public class LoanService {
                         "Prêt introuvable"
                 ));
 
-        if (loan.getLoanStatus() != LoanStatus.VALIDATED) {
+        if (getCurrentStatus(loan) != LoanStatus.VALIDATED) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Le prêt ne peut pas être démarré car il n'est pas au statut VALIDATED.");
@@ -343,16 +362,14 @@ public class LoanService {
                     "Impossible de démarrer un prêt avant sa date de début.");
         }
 
-        loan.setLoanStatus(LoanStatus.ONGOING);
         addHistory(loan, LoanStatus.ONGOING);
-
         Loan saved = loanDao.save(loan);
 
         return new LoanDto(
                 saved.getId(),
                 saved.getStartDate(),
                 saved.getEndDate(),
-                saved.getLoanStatus().name(),
+                getCurrentStatus(saved).name(),
                 saved.getEquipment().getId(),
                 saved.getEquipment().getName(),
                 saved.getAppUser().getId(),
@@ -368,7 +385,7 @@ public class LoanService {
                         "Prêt introuvable"
                 ));
 
-        if (loan.getLoanStatus() != LoanStatus.REQUESTED_EXTENSION) {
+        if (getCurrentStatus(loan) != LoanStatus.REQUESTED_EXTENSION) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La prolongation ne peut être validée que si le prêt est en statut REQUESTED_EXTENSION.");
@@ -400,24 +417,24 @@ public class LoanService {
         loan.setEndDate(newEndDate);
 
         LocalDate today = LocalDate.now();
+        LoanStatus nextStatus;
 
         if (today.isBefore(loan.getStartDate())) {
-            loan.setLoanStatus(LoanStatus.VALIDATED);
+            nextStatus = LoanStatus.VALIDATED;
         } else if (today.isAfter(loan.getEndDate())) {
-            loan.setLoanStatus(LoanStatus.RETURNED);
+            nextStatus = LoanStatus.RETURNED;
         } else {
-            loan.setLoanStatus(LoanStatus.ONGOING);
+            nextStatus = LoanStatus.ONGOING;
         }
 
-        addHistory(loan, loan.getLoanStatus());
-
+        addHistory(loan, nextStatus);
         Loan saved = loanDao.save(loan);
 
         return new LoanDto(
                 saved.getId(),
                 saved.getStartDate(),
                 saved.getEndDate(),
-                saved.getLoanStatus().name(),
+                getCurrentStatus(saved).name(),
                 saved.getEquipment().getId(),
                 saved.getEquipment().getName(),
                 saved.getAppUser().getId(),
@@ -433,14 +450,13 @@ public class LoanService {
                         "Prêt introuvable"
                 ));
 
-        if (loan.getLoanStatus() != LoanStatus.REQUESTED_RETURN) {
+        if (getCurrentStatus(loan) != LoanStatus.REQUESTED_RETURN) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Le retour ne peut être validé que si le prêt est en statut REQUESTED_RETURN.");
         }
 
         loan.setRealEndDate(LocalDate.now());
-        loan.setLoanStatus(LoanStatus.RETURNED);
         addHistory(loan, LoanStatus.RETURNED);
 
         Loan saved = loanDao.save(loan);
@@ -449,7 +465,7 @@ public class LoanService {
                 saved.getId(),
                 saved.getStartDate(),
                 saved.getEndDate(),
-                saved.getLoanStatus().name(),
+                getCurrentStatus(saved).name(),
                 saved.getEquipment().getId(),
                 saved.getEquipment().getName(),
                 saved.getAppUser().getId(),

@@ -4,10 +4,9 @@ import com.mns.cda.locmnsback.dto.EquipmentCreateDto;
 import com.mns.cda.locmnsback.dto.EquipmentDto;
 import com.mns.cda.locmnsback.dto.EquipmentUpdateDto;
 import com.mns.cda.locmnsback.dto.LoanCalendarDto;
-import com.mns.cda.locmnsback.model.Equipment;
 import com.mns.cda.locmnsback.security.IsAdmin;
 import com.mns.cda.locmnsback.security.IsUser;
-import com.mns.cda.locmnsback.services.EquipmentService;
+import com.mns.cda.locmnsback.services.IEquipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ import java.util.List;
 @CrossOrigin
 public class EquipmentController {
 
-    private final EquipmentService equipmentService;
+    private final IEquipmentService equipmentService;
 
     @GetMapping("/equipment/list")
     @IsUser

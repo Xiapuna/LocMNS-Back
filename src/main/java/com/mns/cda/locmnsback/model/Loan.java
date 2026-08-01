@@ -1,7 +1,6 @@
 package com.mns.cda.locmnsback.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.mns.cda.locmnsback.enums.LoanStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -35,10 +34,6 @@ public class Loan {
     @Column
     @NotNull
     protected LocalDate endDate;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    protected LoanStatus loanStatus = LoanStatus.VALIDATED;
 
     @ManyToOne
     protected AppUser appUser;

@@ -11,6 +11,5 @@ import java.util.List;
 public interface LoanDao extends JpaRepository<Loan, Integer> {
     List<Loan> findByEquipmentId(Integer equipmentId);
     List<Loan> findByAppUserId(Integer userId);
-    List<Loan> findByLoanStatus(LoanStatus status);
 
 }

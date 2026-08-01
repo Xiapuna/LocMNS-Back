@@ -17,13 +17,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EquipmentService {
+public class EquipmentService implements IEquipmentService {
 
     private final EquipmentDao equipmentDao;
     private final LoanDao loanDao;
     private final ModelDao modelDao;
     private final LocationDao locationDao;
 
+    @Override
     public List<EquipmentDto> getAll() {
         return equipmentDao.findAll()
                 .stream()
@@ -41,6 +42,7 @@ public class EquipmentService {
                 .toList();
     }
 
+    @Override
     public EquipmentDto get(int id) {
         Equipment e = equipmentDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -61,6 +63,7 @@ public class EquipmentService {
         );
     }
 
+    @Override
     public List<LoanCalendarDto> getLoansForEquipment(int id) {
 
         Equipment equipment = equipmentDao.findById(id)
@@ -78,6 +81,7 @@ public class EquipmentService {
                 .toList();
     }
 
+    @Override
     public EquipmentDto create(EquipmentCreateDto dto) {
 
         Model model = modelDao.findById(dto.modelId())
@@ -113,6 +117,7 @@ public class EquipmentService {
         );
     }
 
+    @Override
     public void delete(int id) {
         Equipment equipment = equipmentDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -123,6 +128,7 @@ public class EquipmentService {
         equipmentDao.delete(equipment);
     }
 
+    @Override
     public EquipmentDto update (int id, EquipmentUpdateDto dto) {
         Equipment existing = equipmentDao.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
